@@ -1,22 +1,34 @@
 # Python Implimentation of BDT
 
-## Purpose: Test potential of HCal-based ML, especially in the case of visible signal decays
+## Purpose: Test potential of ML using multiple subdetectors, especially in the case of visible signal decays
 ## Requirments: Working install of `ldmx-sw-v2.3.0` or greater and `v12` samples.
-##       +     Only tested with container including numpy, xgboost, and matplotlib packages.
+* If using v2.X.X, change `libFramework.so` to `libEvent.so` in `mainframe.py`.
+* `confs/gabreille_back_v1.ini` is used here as an example config. See its comments for further explanation.
 
-Example TreeMaker command to make flat trees from event samples:
-```
-ldmx python3 treeMaker.py -i <absolute_path_to_inputs> -g <labels_for_input_eg_PN> --out <absolute_outdirs> -m <max_events>
-```
-`--indirs` can be used to run over all files from given directories. More information can be found in `mods/ROOTmanager.py`
+In the directory containing `ldmx-sw`, `$LDMX_BASE`, enter `source ldmx-sw/scripts/ldmx-env.sh`.
+* You may clone `ldmx-sw` with a different name (e.g. `ldmx-sw-v3.0.0`), just chnage it in the above command and in `ROOT.gSystem.Load()` in `mainframe.py`
 
-Example bdtMaker command to train BDT:
+### Interactive
+To make flat trees from ldmx event files:
 ```
-ldmx python3 bdtMaker.py -s <path_to_combined_signal_training_file> -b <path_to_bkg_file>
+ldmx python3 mainframe.py trees confs/gabreille_back_v1.ini
 ```
-There's more options for this too but the command gets long anough as is and I usually just change a few numbers in the script rather than using any parsing. You'll get a warning from XGBoost but it's fine, it's working. It just takes a while. I'd suggest training and evaluate on 100 event background and signal samples first just too see how it works.
+* `-m` can be used to give maximum number of events to run over 
+* `-p` can be used to selected a subset of processeses listed in the config file
+* Other options can be found in `mods/ROOTmanager.py` and `mods/configuration.py`
 
-Example bdtEval command to evaluate trained BDT on test samples:
+To train BDT:
+`ldmx hadd` flat trees into the paths given in the config file
 ```
-ldmx python3 eval.py -i <absolute_path_to_testing> -g <labels> --out <absolute_path_output_file_name>
+ldmx python3 mainfraim.py train confs/gabreille_back_v1.ini
 ```
+
+To evaluate trained BDT on test samples:
+```
+ldmx python3 mainframe.py eval confs/gabreille_back_v1.ini
+```
+
+### Batch
+```cp batch.py $LDMX_BASE; cd $LDMX_BASE``` \
+Replace `maineframe.py` in corresponding interactive commands with `batch.py`.\
+(Some options are removed at this stage to avoid making big mistakes; addd them at your own risk.)
