@@ -23,12 +23,16 @@ def main():
 
     # Command that will be used to submit jobs to the batch system
     batch_command = ('bsub '
-                     + '-q short '
-                     + '-W 10 '
+
+                     + '-W 1000 '
+
+                     #+ '-q short '
+                     #+ '-W 10 '
+
                      + '-n 3 '
                      + '-R "select[centos7] span[hosts=1]" '
                      + 'singularity run --home $PWD $PWD/ldmx_dev_latest.sif . '
-                     + 'python3 $PWD/test_bdt/mainframe.py '
+                     + 'python3 $PWD/bdt/mainframe.py '
                      + args.action + ' '
                      + args.config + ' '
                      + '--batch '
@@ -63,11 +67,9 @@ def main():
                             batch_command
                             + '-i ' + infile + ' '
                             + '-o '
-                            + config.get( 'trees', '{}_outdir'.format(st))
+                            + config.get( 'trees', '{}_outdir'.format(st)) \
+                                                                  + '/' + proc
                             )
-
-        if args.action == 'train':
-            job_commands.append( batch_command ) # + -m maybe-later
 
         if args.action == 'eval':
 
@@ -81,6 +83,10 @@ def main():
                     batch_command
                     + '-i ' + infile
                     )
+
+    if args.action == 'train':
+        job_commands.append( batch_command )
+        #job_commands.append( batch_command + '-m 400') # Only for testing 
 
     # Submit them
     for command in job_commands:

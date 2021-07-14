@@ -20,7 +20,7 @@ def main():
     print('\nUsing {} action from conf file: {}'.format(action_str,configFile))
 
     # If batch, just do the thing and exit
-    if pdict['batch']:
+    if pdict['batch'] and action_str != 'train':
         actor( config.parse_batch_config(pdict) ).run()
         sys.exit('\nDONE!')
 
@@ -33,7 +33,8 @@ def main():
                                         )
 
     # Wait for confirmation
-    input('\nPress Enter to continue... ( Also hi, have a good day :D )') 
+    if not pdict['batch']:
+        input('\nPress Enter to continue... ( Also hi, have a good day :D )')
 
     # Construct processes
     # Mayhaps multiprocessing for this?
@@ -44,6 +45,7 @@ def main():
     # Process processes
     for proc in procs:
 
+        # RUN
         proc.run(
             strEvent = pdict['startEvent'],
             maxEvents = pdict['maxEvents'],
@@ -268,7 +270,7 @@ class BdtTrainer():
  
             events = []
             for event in tree:
-                if len(events) == maxEvents > 0: break
+                if len(events) == maxEvents: break
                 events.append(
                         [ getattr(event, feat) for feat in self.branches ]
                     )
