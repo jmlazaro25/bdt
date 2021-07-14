@@ -11,7 +11,7 @@ In the directory containing `ldmx-sw`, `$LDMX_BASE`, enter `source ldmx-sw/scrip
 ### Interactive
 To make flat trees from ldmx event files:
 ```
-ldmx python3 mainframe.py trees confs/gabreille_back_v1.ini
+ldmx python3 mainframe.py trees confs/test.ini
 ```
 * `-m` can be used to give maximum number of events to run over 
 * `-p` can be used to selected a subset of processeses listed in the config file
@@ -20,12 +20,12 @@ ldmx python3 mainframe.py trees confs/gabreille_back_v1.ini
 To train BDT:
 `ldmx hadd` flat trees into the paths given in the config file
 ```
-ldmx python3 mainfraim.py train confs/gabreille_back_v1.ini
+ldmx python3 mainfraim.py train confs/test.ini
 ```
 
 To evaluate trained BDT on test samples:
 ```
-ldmx python3 mainframe.py eval confs/gabreille_back_v1.ini
+ldmx python3 mainframe.py eval confs/test.ini
 ```
 
 ### Batch
