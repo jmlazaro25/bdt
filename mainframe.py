@@ -44,7 +44,6 @@ def main():
     # Process processes
     for proc in procs:
 
-        # RUN
         proc.run(
             strEvent = pdict['startEvent'],
             maxEvents = pdict['maxEvents'],
@@ -269,7 +268,7 @@ class BdtTrainer():
  
             events = []
             for event in tree:
-                if len(events) > maxEvents > 0: break # Techinally 1 too much
+                if len(events) == maxEvents > 0: break
                 events.append(
                         [ getattr(event, feat) for feat in self.branches ]
                     )
