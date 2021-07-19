@@ -4,5 +4,6 @@ __all__ = [
         'physics',
         'ecal',
         'hcal',
-        'tracker'
+        'tracker',
+        'analysis'
         ]

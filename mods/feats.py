@@ -1,6 +1,8 @@
 """
 # Standard tree-building dictionaries
 
+## Analysis quantities
+
 ## Base stuff for testing
 
 ## Visible decay dictionaries next because thesis
@@ -20,8 +22,6 @@
 ## SegCont
 
 ## MipTracking
-
-## Analysis quantities
 
 Priorities (floats allowed for finer precision):
 
@@ -51,6 +51,7 @@ Priorities (floats allowed for finer precision):
 #       removed for brievity
 
 from mods import hcal
+from mods import analysis
 from mods.ecal import segcont
 from mods.ecal import mipTracking
 from mods.ecal import main as emain
@@ -61,6 +62,31 @@ pp = 'v12'
 ##################################################
 # Tree-building dictionaries
 ##################################################
+
+# Analysis quantities (NOT FOR TRAINING)
+##################################################
+analysis_funcs = {
+                    #analysis.trigger: {
+                    #        'priority': 20.1,
+                    #        'brs:' (
+                    #            ('Trigger_'+pp, 'TriggerResult'),
+                    #            )
+                    #    },
+                    analysis.fidcats: {
+                            'priority': 20.1,
+                            'brs': ()
+                        },
+                    analysis.recoilPT: {
+                            'priority': 20.1,
+                            'brs': ()
+                        }
+        }
+
+trees_info_analysis = {
+            'e_fid':    {'rtype': bool, 'default': False},
+            'g_fid':    {'rtype': bool, 'default': False},
+            'recoilPT': {'rtype': float,'default': None }
+        }
 
 # Base stuff (mostly) for testing
 ##################################################
@@ -358,33 +384,15 @@ trees_info_mipTracking = {
             'epDot':                          {'rtype': float, 'default': 0.},
         }
 
-# Analysis quantities (NOT FOR TRAINING)
-# Should be added at end of flat trees to minimize impact on training feats
-# Consider working in sample_analysis stuff
-##################################################
-"""
-branches_info_analysis = {
-        'trigPass':
-            {
-                'rtype': int,
-                'default': 1 ,
-                'func': 'copy_from_iput'
-            },
-        'recoilPT':
-            {
-                'rtype': float,
-                'default': 0.,
-                'func': 'recoilPT'
-            }
-        # Noise next
-        }
-"""
 ##################################################
 # Feature dictionaries
 ##################################################
 
 # Bases
 ##################################################
+
+# Analysis (Not actually feats; ignored in training and eval actors)
+feats_analysis = trees_info_analysis
 
 # Tracker
 

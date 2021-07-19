@@ -1,0 +1,5 @@
+flats/
+samples/
+*_bdt/
+mods/__pycache__/
+mods/ecal/__pycache__/

@@ -4,8 +4,6 @@ import ROOT as r
 import numpy as np
 from mods import configuration as config
 
-#Here!!!!!!!!!!!!!!!!!!!!!!
-
 ##################################################
 # Constants
 ##################################################
@@ -244,6 +242,12 @@ class TreeMaker:
                     branch_name,
                     self.branches[branch_name],
                     branch_name + "/I"
+                    )
+        elif str(rtype) == "<type 'bool'>" or str(rtype) == "<class 'bool'>":
+            self.tree.Branch(
+                    branch_name,
+                    self.branches[branch_name],
+                    branch_name + "/O"
                     )
 
     def resetFeats(self):
