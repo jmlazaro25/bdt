@@ -24,10 +24,10 @@ def main():
     # Command that will be used to submit jobs to the batch system
     batch_command = ('bsub '
 
-                     + '-W 1000 '
+                     #+ '-W 1000 '
 
-                     #+ '-q short '
-                     #+ '-W 10 '
+                     + '-q short '
+                     + '-W 10 '
 
                      + '-n 3 '
                      + '-R "select[centos7] span[hosts=1]" '
@@ -67,7 +67,7 @@ def main():
                             batch_command
                             + '-i ' + infile + ' '
                             + '-o '
-                            + config.get( 'trees', '{}_outdir'.format(st)) \
+                            + config.get( 'trees', '{}_outdir'.format(st) ) \
                                                                   + '/' + proc
                             )
 
@@ -81,7 +81,8 @@ def main():
 
                 job_commands.append(
                     batch_command
-                    + '-i ' + infile
+                    + '-i ' + infile + ' '
+                    + '-o ' + config.get( 'eval', 'outdir' ) + '/' + proc
                     )
 
     if args.action == 'train':

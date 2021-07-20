@@ -233,11 +233,11 @@ def parse_batch_config(clargs):
     if clargs['action'] == 'eval':
 
         # Overwrite branches_info and add discValue
-        branches_info, name = feature_info(configFile)
+        branches_info, name = feature_info(clargs['config'])
         branches_info[ 'discValue_'+name ] = { 'rtype': float, 'default': 0.5 }
 
         pConf = ProcessConfig(
-                infiles = infile,
+                infiles = [infile],
                 tree_name = tree_nem,
                 iD = '{}_eval'.format(fname),
                 strEvent = clargs['startEvent'],
@@ -251,7 +251,7 @@ def parse_batch_config(clargs):
                 outfile = '{}_eval.root'.format(fname),
                 tree_name = name + 'Veto',
                 branches_info = branches_info,
-                outdir =  config.get('eval', 'outdir')
+                outdir = clargs['outlist'][0] 
                 )
 
         return BdtConfig(pConf, tConf, printbrs=True )
