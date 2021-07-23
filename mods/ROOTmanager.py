@@ -230,25 +230,26 @@ class TreeMaker:
 
         """ Add a new branch to write to """
 
-        self.branches[branch_name] = np.zeros(1, dtype=rtype)
+        # Basic types
         if str(rtype) == "<type 'float'>" or str(rtype) == "<class 'float'>":
-            self.tree.Branch(
-                    branch_name,
-                    self.branches[branch_name],
-                    branch_name + "/D"
-                    )
+            rtypeL = '/D'
         elif str(rtype) == "<type 'int'>" or str(rtype) == "<class 'int'>":
-            self.tree.Branch(
-                    branch_name,
-                    self.branches[branch_name],
-                    branch_name + "/I"
-                    )
+            rtypeL = '/I'
         elif str(rtype) == "<type 'bool'>" or str(rtype) == "<class 'bool'>":
+            rtypeL = '/O'
+
+        if typ(ertype) != str:
+            self.branches[branch_name] = np.zeros(1, dtype=rtype)
             self.tree.Branch(
                     branch_name,
                     self.branches[branch_name],
-                    branch_name + "/O"
+                    branch_name + rtypeL
                     )
+
+        # Others
+        elif type(rtype) == str and rtype[:7] == 'vectorOF': # Untested
+            self.branches[branch_name] = r.std.vector( rtype[7:] )()
+            self.tree.Branch(branch_name, self.branches[branch_name])
 
     def resetFeats(self):
 
@@ -269,7 +270,10 @@ class TreeMaker:
         """ Fill the tree with new feature values """
 
         for feat in feats:
-            self.branches[feat][0] = feats[feat]
+            try:
+                self.branches[feat][0] = feats[feat]
+            except:
+                sys.exit( str(feat) + ': ' + str(feats[feat]) )
         self.tree.Fill()
 
     def wq(self):

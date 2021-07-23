@@ -13,10 +13,10 @@ using namespace EffPlotTools;
 
 // Macro to plot ROC curves
 // To run: root -l -q -b plotROC.C+ 
-void plot1ROC(const TString inputdir="/home/jmlazaro/research/bdt/test_bdt/evals", // input directory with flat trees
-             const TString outputdir="/home/jmlazaro/research/bdt/test_bdt/plots", // output directory to save plots into
+void plot1ROC(const TString inputdir="/home/jmlazaro/research/bdt/segmipv3_back_v1_bdt/evals", // input directory with flat trees
+             const TString outputdir="/home/jmlazaro/research/bdt/segmipv3_back_v1_bdt/plots", // output directory to save plots into
              const TString groupings="m",  
-             const TString tree_name="gabrielle_back_v1",  
+             const TString tree_name="segmipv3_back_v1",
              const bool zoom = true, // create a zoomed plot (ranges defined below)
              const bool log = false // create a zoomed plot (ranges defined below)
              )

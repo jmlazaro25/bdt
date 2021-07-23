@@ -239,7 +239,7 @@ def parse_batch_config(clargs):
         pConf = ProcessConfig(
                 infiles = [infile],
                 tree_name = tree_nem,
-                iD = '{}_eval'.format(fname),
+                iD = '{}_eval'.format( fname[:-5] ),
                 strEvent = clargs['startEvent'],
                 maxEvents = clargs['maxEvents'],
                 pfreq = 1000,
@@ -249,7 +249,7 @@ def parse_batch_config(clargs):
 
         tConf = TreeConfig(
                 outfile = '{}_eval.root'.format(fname),
-                tree_name = name + 'Veto',
+                tree_name = name + '_Veto',
                 branches_info = branches_info,
                 outdir = clargs['outlist'][0] 
                 )
