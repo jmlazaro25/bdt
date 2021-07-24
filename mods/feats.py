@@ -120,10 +120,16 @@ trees_info_base_ecal = {
 # Base hcal (maxPE)
 hcal_base_funcs = {
                     hcal.maxPE: {
-                        'priority': 1,
+                        'priority': 30,
                         'brs': (
                             ('HcalVeto_'+pp, 'HcalVetoResult'),
                             ('HcalRecHits_'+pp, 'HcalHit')
+                            )
+                        },
+                    hcal.maxPEsearch: {
+                        'priority': 31,
+                        'brs': (
+                            ('HcalRecHits_'+pp, 'HcalHit'),
                             )
                         }
                 }

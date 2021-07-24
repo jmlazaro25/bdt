@@ -6,10 +6,10 @@ import numpy as np
 air_thick = 2
 scint_thick = 20
 back_dx = 3100
-back_dy = 3100   
-back_numLayers1 = 0        
-back_numLayers2 = 100        
-back_numLayers3 = 0        
+back_dy = 3100
+back_numLayers1 = 0
+back_numLayers2 = 100
+back_numLayers3 = 0
 back_abso2_thick = 25
 back_abso3_thick = 50
 back_layer1_thick = scint_thick + air_thick
@@ -40,20 +40,16 @@ STRIP_MASK = 0xFF  # space for 255 strips/layer
 STRIP_SHIFT = 0
 
 # Analysis Constants
+maxTime = 50
+maxDepth = 4000
 back_segments = 3
 
 ##################################################
 # Global functions
 ##################################################
 
-def maxPE(f_dict, args, h_store, lq):
-
-    """ Copy maxPE from LDMX_events """
-
-    hcalVeto = next( iter( args.values() ) )
-    f_dict['maxPE'] = hcalVeto.getMaxPEHit().getPE()
-
 # ID-related info
+##################################################
 
 def section(hit):
 
@@ -73,6 +69,31 @@ def strip(hit):
 
     return (hit.getID() >> STRIP_SHIFT) & STRIP_MASK
 
+# Global features
+##################################################
+
+def maxPE(f_dict, args, h_store, lq):
+
+    """ Copy maxPE from LDMX_events """
+
+    hcalVeto = next( iter( args.values() ) )
+    hcalVeto.getMaxPEHit().getPE()
+
+    if 0 <= hcalVeto.getMaxPEHit().getPE() < 1e4:
+        f_dict['maxPE'] = hcalVeto.getMaxPEHit().getPE()
+        h_store['searchMaxPE'] = False
+
+    else: h_store['searchMaxPE'] = True # maxPE left at default 0 at this stage
+
+def maxPEsearch(f_dict, args, h_store, hcalRecHit):
+
+    """ If needed, search for maxPE """
+
+    if h_store['searchMaxPE']:
+
+        if f_dict['maxPE'] < hcalRecHit.getPE() < 1e4:
+            f_dict['maxPE'] = hcalRecHit.getPE()
+
 # Consider instead section arg for all functions
 ##################################################
 # Back functions
@@ -86,20 +107,23 @@ def prep_hcal_lfs(f_dict, args, h_store, lq):
 
 def collect(f_dict, args, h_store, hcalRecHit):
 
-    """ Collect hcal hit info in desired manner """
+    """ Collect hcal hit info in desired array format """
 
     # Hit and energy-weighted hit (info) arrays
-    if hcalRecHit.getEnergy() > 0 and section(hcalRecHit) == 0:
+    if not section(hcalRecHit) == 0: return
+    if not hcalRecHit.getEnergy() > 0: return
+    if hcalRecHit.getTime() >= maxTime: return
+    if hcalRecHit.getZPos() > maxDepth: return
 
-        hcalRecHit = np.array( [
-                        hcalRecHit.getEnergy(),
-                        hcalRecHit.getXPos(),
-                        hcalRecHit.getYPos(),
-                        hcalRecHit.getZPos(),
-                        hcalRecHit.getPE()
-                        ] )
+    hcalRecHit = np.array( [
+                    hcalRecHit.getEnergy(),
+                    hcalRecHit.getXPos(),
+                    hcalRecHit.getYPos(),
+                    hcalRecHit.getZPos(),
+                    hcalRecHit.getPE()
+                    ] )
 
-        h_store['back_hits'] = np.vstack( (h_store['back_hits'], hcalRecHit) )
+    h_store['back_hits'] = np.vstack( (h_store['back_hits'], hcalRecHit) )
 
 def back_v1_all(f_dict, args, h_store, lq):
 

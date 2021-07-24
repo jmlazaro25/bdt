@@ -81,6 +81,9 @@ class TreeProcess:
         if self.tree == None:
             self.mvd = True
 
+            # Give warning if config passed no valid paths
+            if self.infiles == []: sys.exit('No valid paths')
+
             # Create the scratch directory if it doesn't already exist
             scratch_dir = self.cwd + '/scratch'
             print( 'Using scratch path %s' % scratch_dir )
@@ -238,7 +241,7 @@ class TreeMaker:
         elif str(rtype) == "<type 'bool'>" or str(rtype) == "<class 'bool'>":
             rtypeL = '/O'
 
-        if typ(ertype) != str:
+        if type(rtype) != str:
             self.branches[branch_name] = np.zeros(1, dtype=rtype)
             self.tree.Branch(
                     branch_name,
