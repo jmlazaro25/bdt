@@ -13,14 +13,17 @@ using namespace EffPlotTools;
 
 // Macro to plot ROC curves
 // To run: root -l -q -b plotROC.C+ 
-void plot1ROC(const TString inputdir="/home/jmlazaro/research/bdt/segmipv3_back_v1_bdt/evals", // input directory with flat trees
-             const TString outputdir="/home/jmlazaro/research/bdt/segmipv3_back_v1_bdt/plots", // output directory to save plots into
+void plot1ROC(const TString inputdir="/nfs/slac/g/ldmx/users/jmlazaro/bdt/gabrielle_bdt/evals", // input directory with flat trees
+             const TString outputdir="/nfs/slac/g/ldmx/users/jmlazaro/bdt/gabrielle_bdt/plots", // output directory to save plots into
              const TString groupings="m",  
-             const TString tree_name="segmipv3_back_v1",
+             const TString tree_name="gabrielle",
              const bool zoom = true, // create a zoomed plot (ranges defined below)
              const bool log = false // create a zoomed plot (ranges defined below)
              )
 {
+
+  const float x_max = 0.002;
+  const float y_min = 0.65;
 
   const float intcut = 0.90;
   const float inteff = 0.001;
@@ -204,14 +207,14 @@ void plot1ROC(const TString inputdir="/home/jmlazaro/research/bdt/segmipv3_back_
 
 
       // Zoom in on and set log for the x axis (bkg eff) if desired
-      if(zoom) rocgr->GetXaxis()->SetLimits(0.0,0.1);
-      if(zoom) rocgr->GetYaxis()->SetRangeUser(0.3,1);
-      if(zoom) rocgr->GetXaxis()->SetLimits(0.0,0.02);
-      if(zoom) rocgr->GetYaxis()->SetRangeUser(0.4,1);
-      if(zoom) rocgr->GetXaxis()->SetLimits(0.0,0.1);
-      if(zoom) rocgr->GetYaxis()->SetRangeUser(0.3,1);
+      if(zoom) rocgr->GetXaxis()->SetLimits(0.0,x_max);
+      if(zoom) rocgr->GetYaxis()->SetRangeUser(y_min,1);
+      if(zoom) rocgr->GetXaxis()->SetLimits(0.0,x_max);
+      if(zoom) rocgr->GetYaxis()->SetRangeUser(y_min,1);
+      if(zoom) rocgr->GetXaxis()->SetLimits(0.0,x_max);
+      if(zoom) rocgr->GetYaxis()->SetRangeUser(y_min,1);
       if(log) {
-        rocgr->GetXaxis()->SetLimits(0.0001,0.1);
+        rocgr->GetXaxis()->SetLimits(0.00001,x_max);
         c1->SetLogx();
       }
 
