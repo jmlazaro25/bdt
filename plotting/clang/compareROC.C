@@ -12,10 +12,12 @@ using namespace EffPlotTools;
 
 // Macro to plot ROC curves
 // To run: root -l -q -b plotROC.C+ 
-void compareROC(const TString inputdirnom="/home/jmlazaro/research/bdt/test_bdt/evals",        // input directory with nominal flat trees
-	            const TString inputdirnew="/home/jmlazaro/research/bdt/segmipv3_back_v1_bdt/evals",        // input directory with new flat trees
-                const TString tree_name_nom="gabrielle_back_v1",
-                const TString tree_name_new="segmipv3_back_v1", 
+void compareROC(const TString inputdirnom="/nfs/slac/g/ldmx/users/jmlazaro/bdt/gabrielle_bdt/evals",
+	            const TString inputdirnew="/nfs/slac/g/ldmx/users/jmlazaro/bdt/back_v1_bdt/evals",
+	            const TString outputdirnom="/nfs/slac/g/ldmx/users/jmlazaro/bdt/gabrielle_bdt/plots",
+	            const TString outputdirnew="/nfs/slac/g/ldmx/users/jmlazaro/bdt/back_v1_bdt/plots",
+                const TString tree_name_nom="gabrielle",
+                const TString tree_name_new="back_v1", 
                 const bool zoom = true, // create a zoomed plot (ranges defined below)
                 const bool log = false // create a zoomed plot (ranges defined below)
                 )
@@ -23,8 +25,8 @@ void compareROC(const TString inputdirnom="/home/jmlazaro/research/bdt/test_bdt/
 
     const TString outputdir = inputdirnew;  // output directory to save plots into
 
-  const TString nomStr = "gab_back";
-  const TString newStr = "segmip3_back";
+  const TString nomStr = "Gabrielle";
+  const TString newStr = "Backv1";
 
   const float intcut = 0.90;
   const float inteff = 0.001;
@@ -85,7 +87,8 @@ void compareROC(const TString inputdirnom="/home/jmlazaro/research/bdt/test_bdt/
   // Make nice looking plots
   SetTDRStyle();
 
-  gSystem->mkdir(outputdir, true);
+  gSystem->mkdir(outputdirnom, true);
+  gSystem->mkdir(outputdirnew, true);
 
 
   // Loop over selections
@@ -234,7 +237,8 @@ void compareROC(const TString inputdirnom="/home/jmlazaro/research/bdt/test_bdt/
     // Draw LDMX text
     LDMX_lumi(c1,0);
     // Save the plot
-    c1->SaveAs(outputdir+"/" + (zoom ? "zoom" : "") + (log ? "_log" : "") + "_compareROC_"+nomStr+"v"+newStr+".pdf");
+    c1->SaveAs(outputdirnom+"/" + seln + (zoom ? "_zoom" : "") + (log ? "_log" : "") + "_compareROC_"+tree_name_nom+"v"+tree_name_new+".pdf");
+    c1->SaveAs(outputdirnew+"/" + seln + (zoom ? "_zoom" : "") + (log ? "_log" : "") + "_compareROC_"+tree_name_nom+"v"+tree_name_new+".pdf");
     c1->Close();
   }
 }

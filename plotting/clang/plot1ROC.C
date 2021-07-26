@@ -241,7 +241,7 @@ void plot1ROC(const TString inputdir="/nfs/slac/g/ldmx/users/jmlazaro/bdt/gabrie
     // Draw LDMX text
     LDMX_lumi(c1,0);
     // Save the plot
-    c1->SaveAs(outputdir+"/" + seln + (zoom ? "_zoom" : "") + (log ? "_log" : "") + "_ROC.pdf");
+    c1->SaveAs(outputdir+"/" + seln + '_' + tree_name + (zoom ? "_zoom" : "") + (log ? "_log" : "") + "_ROC.pdf");
     c1->Close();
   }
 }
