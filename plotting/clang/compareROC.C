@@ -13,11 +13,11 @@ using namespace EffPlotTools;
 // Macro to plot ROC curves
 // To run: root -l -q -b plotROC.C+ 
 void compareROC(const TString inputdirnom="/nfs/slac/g/ldmx/users/jmlazaro/bdt/gabrielle_bdt/evals",
-	            const TString inputdirnew="/nfs/slac/g/ldmx/users/jmlazaro/bdt/back_v1_bdt/evals",
+	            const TString inputdirnew="/nfs/slac/g/ldmx/users/jmlazaro/bdt/gabrielle_back_v1_bdt/evals",
 	            const TString outputdirnom="/nfs/slac/g/ldmx/users/jmlazaro/bdt/gabrielle_bdt/plots",
-	            const TString outputdirnew="/nfs/slac/g/ldmx/users/jmlazaro/bdt/back_v1_bdt/plots",
+	            const TString outputdirnew="/nfs/slac/g/ldmx/users/jmlazaro/bdt/gabrielle_back_v1_bdt/plots",
                 const TString tree_name_nom="gabrielle",
-                const TString tree_name_new="back_v1", 
+                const TString tree_name_new="gabrielle_back_v1", 
                 const bool zoom = true, // create a zoomed plot (ranges defined below)
                 const bool log = false // create a zoomed plot (ranges defined below)
                 )
@@ -26,7 +26,10 @@ void compareROC(const TString inputdirnom="/nfs/slac/g/ldmx/users/jmlazaro/bdt/g
     const TString outputdir = inputdirnew;  // output directory to save plots into
 
   const TString nomStr = "Gabrielle";
-  const TString newStr = "Backv1";
+  const TString newStr = "GabBackv1";
+
+  const float x_max = 0.002;
+  const float y_min = 0.65;
 
   const float intcut = 0.90;
   const float inteff = 0.001;
@@ -198,12 +201,12 @@ void compareROC(const TString inputdirnom="/nfs/slac/g/ldmx/users/jmlazaro/bdt/g
 
 
       // Zoom in on and set log for the x axis (bkg eff) if desired
-      if(zoom) rocgrnom->GetXaxis()->SetLimits(0.0,0.1);
-      if(zoom) rocgrnom->GetYaxis()->SetRangeUser(0.3,1);
-      if(zoom) rocgrnew->GetXaxis()->SetLimits(0.0,0.1);
-      if(zoom) rocgrnew->GetYaxis()->SetRangeUser(0.3,1);
+      if(zoom) rocgrnom->GetXaxis()->SetLimits(0.0,x_max);
+      if(zoom) rocgrnom->GetYaxis()->SetRangeUser(y_min,1);
+      if(zoom) rocgrnew->GetXaxis()->SetLimits(0.0,x_max);
+      if(zoom) rocgrnew->GetYaxis()->SetRangeUser(y_min,1);
       if(log) {
-        rocgrnom->GetXaxis()->SetLimits(0.0001,0.1);
+        rocgrnom->GetXaxis()->SetLimits(0.00001,x_max);
         c1->SetLogx();
       }
 

@@ -209,10 +209,6 @@ void plot1ROC(const TString inputdir="/nfs/slac/g/ldmx/users/jmlazaro/bdt/gabrie
       // Zoom in on and set log for the x axis (bkg eff) if desired
       if(zoom) rocgr->GetXaxis()->SetLimits(0.0,x_max);
       if(zoom) rocgr->GetYaxis()->SetRangeUser(y_min,1);
-      if(zoom) rocgr->GetXaxis()->SetLimits(0.0,x_max);
-      if(zoom) rocgr->GetYaxis()->SetRangeUser(y_min,1);
-      if(zoom) rocgr->GetXaxis()->SetLimits(0.0,x_max);
-      if(zoom) rocgr->GetYaxis()->SetRangeUser(y_min,1);
       if(log) {
         rocgr->GetXaxis()->SetLimits(0.00001,x_max);
         c1->SetLogx();
