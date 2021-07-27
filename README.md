@@ -30,5 +30,5 @@ ldmx python3 mainframe.py eval confs/test.ini
 
 ### Batch
 ```cp batch.py $LDMX_BASE; cd $LDMX_BASE``` \
-Replace `maineframe.py` in corresponding interactive commands with `batch.py`.\
-(Some options are removed at this stage to avoid making big mistakes; addd them at your own risk.)
+Remove `ldmx` and replace `maineframe.py` in corresponding interactive commands with `batch.py`.\
+(Some options are removed at this stage to avoid making big mistakes; add them at your own risk.)
