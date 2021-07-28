@@ -125,7 +125,7 @@ def collect(f_dict, args, h_store, hcalRecHit):
 
     h_store['back_hits'] = np.vstack( (h_store['back_hits'], hcalRecHit) )
 
-def back_v1_all(f_dict, args, h_store, lq):
+def backv1_all(f_dict, args, h_store, lq):
 
     """ Calculate collective part of 'first' set of hcal features  """
     
@@ -180,7 +180,7 @@ def back_v1_all(f_dict, args, h_store, lq):
     f_dict['back_dz_e'] = max( h_store['back_hits'][1:,3] )\
                             - h_store['back_avg_e_z']
 
-def back_v1_seg(f_dict, args, h_store, lq):
+def backv1_seg(f_dict, args, h_store, lq):
 
     """ Calculate regional parts of 'first' set of hcal features """
 

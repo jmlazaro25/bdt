@@ -7,9 +7,9 @@
 
 ## Visible decay dictionaries next because thesis
     ### Bases
-        - back_v1
-        - side_v1 (coming soon)
-        - tracker_v1 (coming soon)
+        - backv1
+        - sidev1 (coming soon)
+        - trackerv1 (coming soon)
 
     ### Combos
         - hcal_vx (back_vx + side_vx)
@@ -72,6 +72,13 @@ analysis_funcs = {
                     #            ('Trigger_'+pp, 'TriggerResult'),
                     #            )
                     #    },
+                    emain.ecal_init: {
+                        'priority': 20,
+                        'brs': (
+                            ('TargetScoringPlaneHits_'+pp, 'SimTrackerHit'),
+                            ('EcalScoringPlaneHits_'+pp, 'SimTrackerHit')
+                            )
+                        },
                     analysis.fidcats: {
                             'priority': 20.1,
                             'brs': ()
@@ -118,7 +125,7 @@ trees_info_base_ecal = {
         }
 
 # Base hcal (maxPE)
-hcal_base_funcs = {
+maxPE_funcs = {
                     hcal.maxPE: {
                         'priority': 30,
                         'brs': (
@@ -138,7 +145,7 @@ trees_info_maxPE = {
         'maxPE': {'rtype': int, 'default': 0 },
         }
 
-# Intemded for Back HCal (section 0) back_v1
+# Intemded for Back HCal (section 0) backv1
 # "Full" list
 # avg_x/y commented out in case of pT concerns, but may not be relevant in
 # visible decay scenarios anyway
@@ -146,27 +153,27 @@ trees_info_maxPE = {
 ##################################################
 
 # All of back section
-hcal_back_v1_all_funcs = {
-                            hcal.prep_hcal_lfs: {
-                                'priority': 30,
-                                'brs': ()
-                                },
-                            # HCalRecHits not technically used in this function
-                            # but it's got to be somewhere and this seems like
-                            # the best place
-                            hcal.collect: {
-                                'priority': 31,
-                                'brs': (
-                                    ('HcalRecHits_'+pp, 'HcalHit'),
-                                    )
-                                },
-                            hcal.back_v1_all: {
-                                'priority': 32,
-                                'brs': ()
-                                }
-                        }
+backv1_all_funcs = {
+                        hcal.prep_hcal_lfs: {
+                            'priority': 30,
+                            'brs': ()
+                            },
+                        # HCalRecHits not technically used in this function
+                        # but it's got to be somewhere and this seems like
+                        # the best place
+                        hcal.collect: {
+                            'priority': 31,
+                            'brs': (
+                                ('HcalRecHits_'+pp, 'HcalHit'),
+                                )
+                            },
+                        hcal.backv1_all: {
+                            'priority': 32,
+                            'brs': ()
+                            }
+                    }
 
-trees_info_back_v1 = {                                                               
+trees_info_backv1_all = { 
         'back_nHits':   {'rtype': int,   'default': 0.},
         'back_totE':    {'rtype': float, 'default': 0.},
         'back_totPE':   {'rtype': float, 'default': 0.},
@@ -181,49 +188,53 @@ trees_info_back_v1 = {
         'back_dz_e':    {'rtype': float, 'default': 0.},
         }
 
-# Global (insludes sides)
-trees_info_back_v1.update( trees_info_maxPE )
-
 # Back section segments
-hcal_back_v1_seg_funcs = {
-                            hcal.prep_hcal_lfs: {
-                                'priority': 30,
-                                'brs': ()
-                                },
-                            hcal.collect: {
-                                'priority': 31,
-                                'brs': (
-                                    ('HcalRecHits_'+pp, 'HcalHit'),
-                                    )
-                                },
-                            hcal.back_v1_seg: {
-                                'priority': 33,
-                                'brs': ()
-                                }
-                        }
+backv1_seg_funcs = {
+                        hcal.prep_hcal_lfs: {
+                            'priority': 30,
+                            'brs': ()
+                            },
+                        hcal.collect: {
+                            'priority': 31,
+                            'brs': (
+                                ('HcalRecHits_'+pp, 'HcalHit'),
+                                )
+                            },
+                        hcal.backv1_seg: {
+                            'priority': 33,
+                            'brs': ()
+                            }
+                    }
 
+trees_info_backv1_seg = {}
 for i in range(1, hcal.back_segments + 1):
 
-    trees_info_back_v1['back_nHits_{}e'.format(i)]  = {'rtype': int,   'default': 0.}
-    trees_info_back_v1['back_tot_{}e_e'.format(i)]  = {'rtype': float, 'default': 0.}
-    trees_info_back_v1['back_tot_{}e_pe'.format(i)] = {'rtype': int,   'default': 0.}
-    trees_info_back_v1['back_max_{}e_e'.format(i)]  = {'rtype': float, 'default': 0.}
-    trees_info_back_v1['back_max_{}e_pe'.format(i)] = {'rtype': int,   'default': 0.}
-    trees_info_back_v1['back_avg_{}e_e'.format(i)]  = {'rtype': float, 'default': 0.}
-    #trees_info_back_v1['back_avg_{}e_x'.format(i)]  = {'rtype': float, 'default': 0.} # Maybe pT bias
-    #trees_info_back_v1['back_avg_{}e_y'.format(i)]  = {'rtype': float, 'default': 0.} # Don't train
-    trees_info_back_v1['back_avg_{}e_pe'.format(i)] = {'rtype': float, 'default': 0.}
-    trees_info_back_v1['back_avg_{}e_r'.format(i)]  = {'rtype': float, 'default': 0.}
-    trees_info_back_v1['back_std_{}e_e'.format(i)]  = {'rtype': float, 'default': 0.}
-    trees_info_back_v1['back_std_{}e_x'.format(i)]  = {'rtype': float, 'default': 0.}
-    trees_info_back_v1['back_std_{}e_y'.format(i)]  = {'rtype': float, 'default': 0.}
-    trees_info_back_v1['back_std_{}e_pe'.format(i)] = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg['back_nHits_{}e'.format(i)]  = {'rtype': int,   'default': 0.}
+    trees_info_backv1_seg['back_tot_{}e_e'.format(i)]  = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg['back_tot_{}e_pe'.format(i)] = {'rtype': int,   'default': 0.}
+    trees_info_backv1_seg['back_max_{}e_e'.format(i)]  = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg['back_max_{}e_pe'.format(i)] = {'rtype': int,   'default': 0.}
+    trees_info_backv1_seg['back_avg_{}e_e'.format(i)]  = {'rtype': float, 'default': 0.}
+    #trees_info_backv1_seg['back_avg_{}e_x'.format(i)]  = {'rtype': float, 'default': 0.} # Maybe pT bias
+    #trees_info_backv1_seg['back_avg_{}e_y'.format(i)]  = {'rtype': float, 'default': 0.} # Don't train
+    trees_info_backv1_seg['back_avg_{}e_pe'.format(i)] = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg['back_avg_{}e_r'.format(i)]  = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg['back_std_{}e_e'.format(i)]  = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg['back_std_{}e_x'.format(i)]  = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg['back_std_{}e_y'.format(i)]  = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg['back_std_{}e_pe'.format(i)] = {'rtype': float, 'default': 0.}
 
-back_v1_funcs = {
-            **hcal_base_funcs,
-            **hcal_back_v1_all_funcs,
-            **hcal_back_v1_seg_funcs
+backv1_funcs = {
+            **maxPE_funcs,
+            **backv1_all_funcs,
+            **backv1_seg_funcs
         }
+
+trees_info_backv1 = {
+                    **trees_info_maxPE,
+                    **trees_info_backv1_all,
+                    **trees_info_backv1_seg
+                    }
 
 # Gabrielle
 ##################################################
@@ -405,7 +416,11 @@ feats_analysis = trees_info_analysis
 # Hcal
 feats_maxPE = trees_info_maxPE 
 
-feats_back_v1 = trees_info_back_v1
+feats_backv1_all = trees_info_backv1_all
+
+feats_backv1_seg = trees_info_backv1_seg
+
+feats_backv1 = trees_info_backv1
 
 # Ecal
 feats_base_ecal = trees_info_base_ecal
