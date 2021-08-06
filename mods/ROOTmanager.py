@@ -5,38 +5,6 @@ import numpy as np
 from mods import configuration as config
 
 ##################################################
-# Constants
-##################################################
-
-# ROOT colors
-colors = {
-        'kBlue': 600,
-        'kGreen': 417,
-        'kMagenta': 616,
-        'kOrange': 807, # +7
-        'kBlack': 1,
-        'kYellow': 400,
-        'kViolet': 880,
-        'kRed': 632,
-        'kCyan': 432
-        }
-
-# For easier loops
-color_list = [colors[key] for key in colors]
-
-# ROOT 1D/2D line styles
-lineStyles = {
-        'kSolid': 1,
-        'kDashed': 2,
-        'kDotted': 3,
-        'kDashDotted': 4
-        }
-
-# For easier loops
-lineStyle_list = [i for i in range(1,11)]
-
-
-##################################################
 # Classes
 ##################################################
 
@@ -304,67 +272,81 @@ class Histogram:
 # Functions
 ##################################################
 
-def parse(nolist = False):
+def parse():
 
     from glob import glob
     from argparse import ArgumentParser
 
     # Arguments
     parser = ArgumentParser()
-    parser.add_argument('action', action='store',
+    parser.add_argument(
+            'action',
             default=None,
-            help='BDT actor string (trees, train, or eval)')
-    parser.add_argument('config', action='store',
-            help='BDT configuration file')
-    parser.add_argument('-p', nargs='+', action='store', dest='mprocs',
+            help='BDT actor string (trees, train, or eval)'
+            )
+    parser.add_argument(
+            'config',
+            help='BDT configuration file'
+            )
+    parser.add_argument(
+            '-p',
+            dest='mprocs',
+            nargs='+',
             default=None,
-            help='Process names to be run from config e.g. pn, 1.0 (for sig)')
-    parser.add_argument('--batch', action='store_true', dest='batch',
+            help='Process names to be run from config e.g. pn, 1.0 (for sig)'
+            )
+    parser.add_argument(
+            '--batch',
+            dest='batch',
+            action='store_true',
             default=False,
-            help='Run in batch mode [Default: False]')
-    parser.add_argument('--sep', action='store_true', dest='separate',
-            default = False,
-            help='separate events into different files [Default: False]')
-    parser.add_argument('-i', nargs='+', action='store', dest='infiles',
+            help='Run in batch mode [Default: False]'
+            )
+    parser.add_argument(
+            '-i',
+            dest='infiles',
+            nargs='+',
             default=[],
-            help='input file(s)')
-    parser.add_argument('--indirs', nargs='+', action='store', dest='indirs',
-            default=[],
-            help='Director(y/ies) of input files')
-    parser.add_argument('-g','-groupls', nargs='+', action='store',
+            help='input file(s)'
+            )
+    parser.add_argument(
+            '-g',
+            '-groupls',
             dest='group_labels',
+            nargs='+',
             default='',
-            help='Human readable sample labels e.g. for legends')
-    parser.add_argument('-o','--out', nargs='+', action='store', dest='out',
+            help='Human readable sample labels e.g. for legends'
+            )
+    parser.add_argument(
+            '-o',
+            '--out',
+            dest='out',
+            nargs='+',
             default=[],
-            help='output files or director(y/ies) of output files')
+            help='output files or director(y/ies) of output files'
             # if inputting directories, it's best to make a system
-            # for naming files in main() of main script 
-    parser.add_argument('--notlist', action='store_true', dest='nolist',
-            help="return things without lists")
-    parser.add_argument('-s','--start', type=int, action='store',
-            dest='startEvent',
-            default=0, help='event to start at')
-    parser.add_argument('-m', type=int, action='store', dest='maxEvents',
-            default=-1, help='max events to run over for EACH group')
+            # for naming files in main() of main script
+            )
+    parser.add_argument(
+            '-m',
+            type=int,
+            action='store',
+            dest='maxEvents',
+            default=-1,
+            help='max events to run over for EACH group'
+            )
     args = parser.parse_args()
 
     # Input
     if args.infiles != []:
         inlist = [[f] for f in args.infiles] # Makes general loading easier
-        if nolist or args.nolist == True:
-            inlist = inlist[0]
     elif args.indirs != []:
         inlist = [glob(indir + '/*.root') for indir in args.indirs]
-        if nolist or args.nolist == True:
-            inlist = inlist[0]
     else: inlist = []
 
     # Output
     if args.out != []:
         outlist = args.out
-        if nolist or args.nolist == True:
-            outlist = outlist[0]
     else: outlist = []
     
     pdict = {
