@@ -1,9 +1,11 @@
 import sys
-import ROOT
 import mods.ROOTmanager as manager
 import mods.configuration as config
-#ROOT.gSystem.Load('/nfs/slac/g/ldmx/users/${USER}/ldmx-sw/install/lib/libFramework.so')
-ROOT.gSystem.Load('libFramework.so')
+import ROOT.gSystem as ROOTgSystem
+#ROOTgSystem.Load('/nfs/slac/g/ldmx/users/${USER}/ldmx-sw/install/lib/libFramework.so')
+ROOTgSystem.Load('libFramework.so')
+
+# TODO: Read in decay_zs for vissig
 
 def main():
     
