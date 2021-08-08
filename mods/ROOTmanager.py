@@ -254,20 +254,6 @@ class TreeMaker:
         self.tfout.Write(self.tree_name)
         self.tfout.Close()
 
-class Histogram:
-
-    """ Just to hold histogram-related stuff and make other py code nicer """
-
-    def __init__(self, hist, title='', xlabel='x', ylabel='y',\
-            color=1, lineStyle=1, fillStyle=1):
-        self.hist = hist
-        self.title = title
-        self.xlabel = xlabel
-        self.ylabel = ylabel
-        self.color = color
-        self.lineStyle = lineStyle
-        self.fillStyle = fillStyle
-
 ##################################################
 # Functions
 ##################################################
@@ -310,6 +296,13 @@ def parse():
             help='input file(s)'
             )
     parser.add_argument(
+            '--indirs',
+            dest='indirs',
+            nargs='+',
+            default=[],
+            help='input directories (runs over all root files in directories)'
+            )
+    parser.add_argument(
             '-g',
             '-groupls',
             dest='group_labels',
@@ -328,10 +321,16 @@ def parse():
             # for naming files in main() of main script
             )
     parser.add_argument(
-            '-m',
+            '-s',
+            dest='startEvent',
             type=int,
-            action='store',
+            default=0,
+            help='event to start at'
+            )
+    parser.add_argument(
+            '-m',
             dest='maxEvents',
+            type=int,
             default=-1,
             help='max events to run over for EACH group'
             )
@@ -354,7 +353,6 @@ def parse():
             'config': args.config,
             'mprocs': args.mprocs,
             'batch': args.batch,
-            'separate': args.separate,
             'inlist': inlist,
             'groupls': args.group_labels,
             'outlist': outlist,
