@@ -80,19 +80,29 @@ analysis_funcs = {
                             )
                         },
                     analysis.fidcats: {
-                            'priority': 20.1,
-                            'brs': ()
+                        'priority': 20.1,
+                        'brs': ()
                         },
                     analysis.recoilPT: {
-                            'priority': 20.1,
-                            'brs': ()
+                        'priority': 20.1,
+                        'brs': ()
+                        },
+                    analysis.decay_verts: {
+                        'priority':  1,
+                        'brs': (
+                            ('SimParticles_'+pp, 'SimParticle'),
+                            )
                         }
         }
 
 trees_info_analysis = {
             'e_fid':    {'rtype': bool, 'default': False},
             'g_fid':    {'rtype': bool, 'default': False},
-            'recoilPT': {'rtype': float,'default': None }
+            'recoilPT': {'rtype': float,'default': None },
+            'Ap_dt':    {'rtype': float,'default': None },
+            'Ap_dx':    {'rtype': float,'default': None },
+            'Ap_dy':    {'rtype': float,'default': None },
+            'Ap_dz':    {'rtype': float,'default': None },
         }
 
 # Base stuff (mostly) for testing

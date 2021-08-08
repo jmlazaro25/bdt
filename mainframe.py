@@ -5,8 +5,6 @@ import ROOT.gSystem as ROOTgSystem
 #ROOTgSystem.Load('/nfs/slac/g/ldmx/users/${USER}/ldmx-sw/install/lib/libFramework.so')
 ROOTgSystem.Load('libFramework.so')
 
-# TODO: Read in decay_zs for vissig
-
 def main():
     
     # Parse command line args and init most important ones

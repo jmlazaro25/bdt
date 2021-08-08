@@ -30,3 +30,18 @@ def recoilPT(f_dict, args, e_store, lq):
     """ Save recoilPMag from ecal_init to tree """
 
     f_dict['recoilPT'] = e_store['recoilPMag']
+
+def decay_verts(f_dict, args, x_store, lq):
+
+    """
+    A' decay verticies (only applicable to vissig samples)
+    +/- ~1 mm as really using electron creation verticies
+    """
+
+    Abi = 1
+    for simParticle in next( iter( args.values() ) ):
+        Abi += 1
+        if Abi != 4: continue
+        #f_dict['Ap_dt'] = simParticle[1].getTime Is overloading not sig anw
+        f_dict['Ap_dx'], f_dict['Ap_dy'], f_dict['Ap_dz'] \
+                = simParticle[1].getVertex()
