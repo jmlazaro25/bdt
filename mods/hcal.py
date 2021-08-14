@@ -130,8 +130,7 @@ def backv1_all(f_dict, args, h_store, lq):
     """ Calculate collective part of 'first' set of hcal features  """
     
     # Don't try if there are no hits
-    if type(h_store['back_hits'][0]) != np.ndarray:
-        return
+    if type(h_store['back_hits'][0]) != np.ndarray: return
 
     f_dict['back_nHits'] = len(h_store['back_hits']) - 1
     f_dict['back_totE'] = sum( h_store['back_hits'][1:,0] )
@@ -152,13 +151,6 @@ def backv1_all(f_dict, args, h_store, lq):
                             weights = h_store['back_hits'][1:,0]
                             )
     f_dict['back_avgPE'] = np.mean( h_store['back_hits'][1:,4] )
-    f_dict['back_avgR'] = np.average(
-            np.sqrt(
-                (h_store['back_hits'][1:,1]-h_store['back_avg_e_x'])**2 +\
-                (h_store['back_hits'][1:,2]-h_store['back_avg_e_y'])**2
-                ),
-            weights = h_store['back_hits'][1:,0]
-            )
     f_dict['back_std_e_x'] = math.sqrt(
             np.average( 
                 (h_store['back_hits'][1:,1] - h_store['back_avg_e_x'])**2 ,
@@ -185,14 +177,13 @@ def backv1_seg(f_dict, args, h_store, lq):
     """ Calculate regional parts of 'first' set of hcal features """
 
     # Don't try if there are no hits
-    if type(h_store['back_hits'][0]) != np.ndarray:
-        return
+    if type(h_store['back_hits'][0]) != np.ndarray: return
 
-     # Regional Stats
+    # Regional Stats
     hits_e_1 = hits_e_2 = hits_e_3 = np.zeros(5)
     
     # Group hits into regions
-    for hcalRecHit in h_store['back_hits']:
+    for hcalRecHit in h_store['back_hits'][1:]:
         if hcalRecHit[3] < h_store['back_avg_e_z']:
             hits_e_1 = np.vstack( (hits_e_1, hcalRecHit) )
         elif hcalRecHit[3] < h_store['back_avg_e_z'] + f_dict['back_std_e_z']:
@@ -202,38 +193,31 @@ def backv1_seg(f_dict, args, h_store, lq):
 
     # For each region, find averages, radii, etc.
     regions = [0, hits_e_1, hits_e_2, hits_e_3]
-    for i in range(1,4):
-        if type(regions[i][0]) == np.ndarray: # Make sure the region has any hits
-            f_dict['back_nHits_{}e'.format(i)] = len( regions[i] ) - 1
-            f_dict['back_tot_{}e_e'.format(i)] = sum( regions[i][1:,0] )
-            if f_dict['back_tot_{}e_e'.format(i)] == 0: continue # Rounding round error
-            f_dict['back_tot_{}e_pe'.format(i)] = sum( regions[i][1:,4] )
-            f_dict['back_max_{}e_e'.format(i)] = max( regions[i][1:,0] )
-            f_dict['back_max_{}e_pe'.format(i)] = max( regions[i][1:,4] )
-            f_dict['back_avg_{}e_e'.format(i)] = np.mean( regions[i][1:,0] )
-            avg_e_x = np.average( regions[i][1:,1], weights = regions[i][1:,0] )
-            avg_e_y = np.average( regions[i][1:,2], weights = regions[i][1:,0] )
-            f_dict['back_avg_{}e_pe'.format(i)] = np.mean( regions[i][1:,0] )
-            f_dict['back_avg_{}e_r'.format(i)] = np.average(
-                    np.sqrt(
-                        (regions[i][1:,1]-avg_e_x)**2 +\
-                        (regions[i][1:,2]-avg_e_y)**2
-                        ),
-                    weights = regions[i][1:,0]
-                    )
-            if f_dict['back_nHits_{}e'.format(i)] > 1: # Std = 0 if there's only 1 hit
-                f_dict['back_std_{}e_e'.format(i)] = math.sqrt(
-                        sum((regions[i][1:,0] - f_dict['back_avg_{}e_e'.format(i)])**2)/\
-                            f_dict['back_nHits_{}e'.format(i)] )
-                f_dict['back_std_{}e_x'.format(i)] = math.sqrt( np.average( 
-                    (regions[i][1:,1] - avg_e_x)**2,
-                    weights = regions[i][1:,0] ) )
-                f_dict['back_std_{}e_y'.format(i)] = math.sqrt( np.average( 
-                    (regions[i][1:,2] - avg_e_y)**2,
-                    weights = regions[i][1:,0] ) )
-                f_dict['back_std_{}e_pe'.format(i)] = math.sqrt(
-                        sum((regions[i][1:,4] - f_dict['back_avg_{}e_pe'.format(i)])**2)/\
-                            f_dict['back_nHits_{}e'.format(i)] )
+    for s in range(1,4):
+        if type(regions[s][0]) == np.ndarray: # Make sure the region has any hits
+            f_dict[f'back_nHits_{s}e'] = len( regions[s] ) - 1
+            f_dict[f'back_tot_{s}e_e'] = sum( regions[s][1:,0] )
+            if f_dict[f'back_tot_{s}e_e'] == 0: continue # Rounding round error
+            f_dict[f'back_tot_{s}e_pe'] = sum( regions[s][1:,4] )
+            f_dict[f'back_max_{s}e_e'] = max( regions[s][1:,0] )
+            f_dict[f'back_max_{s}e_pe'] = max( regions[s][1:,4] )
+            f_dict[f'back_avg_{s}e_e'] = np.mean( regions[s][1:,0] )
+            avg_e_x = np.average( regions[s][1:,1], weights = regions[s][1:,0] )
+            avg_e_y = np.average( regions[s][1:,2], weights = regions[s][1:,0] )
+            f_dict[f'back_avg_{s}e_pe'] = np.mean( regions[s][1:,0] )
+            if f_dict[f'back_nHits_{s}e'] > 1: # Std = 0 if there's only 1 hit
+                f_dict[f'back_std_{s}e_e'] = math.sqrt(
+                        sum((regions[s][1:,0] - f_dict[f'back_avg_{s}e_e'])**2)/\
+                            f_dict[f'back_nHits_{s}e'] )
+                f_dict[f'back_std_{s}e_x'] = math.sqrt( np.average( 
+                    (regions[s][1:,1] - avg_e_x)**2,
+                    weights = regions[s][1:,0] ) )
+                f_dict[f'back_std_{s}e_y'] = math.sqrt( np.average( 
+                    (regions[s][1:,2] - avg_e_y)**2,
+                    weights = regions[s][1:,0] ) )
+                f_dict[f'back_std_{s}e_pe'] = math.sqrt(
+                        sum((regions[s][1:,4] - f_dict[f'back_avg_{s}e_pe'])**2)/\
+                            f_dict[f'back_nHits_{s}e'] )
 
 ##################################################
 # Side functions

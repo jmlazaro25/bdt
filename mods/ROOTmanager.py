@@ -1,5 +1,4 @@
 import os
-import sys
 import ROOT as r
 import numpy as np
 from mods import configuration as config
@@ -13,7 +12,7 @@ class TreeProcess:
     """ For analysing .root samples """
 
     def __init__(self,
-            pConfig, 
+            pConfig,
             branches=None,
             event_process=None,
             startfs=None,
@@ -24,7 +23,7 @@ class TreeProcess:
             pfreq=1000,
             color=1
             ):
-        
+
         self.branches = branches
         self.event_process = event_process
         self.startfs = startfs
@@ -50,7 +49,7 @@ class TreeProcess:
             self.mvd = True
 
             # Give warning if config passed no valid paths
-            if self.infiles == []: sys.exit('No valid paths')
+            if self.infiles == []: quit('No valid paths')
 
             # Create the scratch directory if it doesn't already exist
             scratch_dir = self.cwd + '/scratch'
@@ -64,7 +63,7 @@ class TreeProcess:
                 if os.path.exists( scratch_dir+'/tmp_'+str(num) ):
                     num += 1
                 else:
-                    check = False 
+                    check = False
 
             # Create and mv into tmp directory that can be used to copy files into
             if self.batch:
@@ -81,10 +80,10 @@ class TreeProcess:
             for rfilename in self.infiles:
                 os.system("cp %s ." % rfilename )
             os.system("ls .")
-    
+
             # Just get the file names without the full path
             tmpfiles = [f.split('/')[-1] for f in self.infiles]
-    
+
             # Load'em
             if self.tree_name != None:
                 self.tree = load(tmpfiles, self.tree_name)
@@ -94,7 +93,7 @@ class TreeProcess:
             # Add input branaches as attributes
             if self.branches != None:
                 for btup in self.branches:
-                    setattr(self, btup[0], self.addBranch(btup[1], btup[0]))    
+                    setattr(self, btup[0], self.addBranch(btup[1], btup[0]))
 
             # Move back to cwd in case running multiple procs
             os.chdir(self.cwd)
@@ -104,7 +103,7 @@ class TreeProcess:
         """  Add a new branch to read from """
 
         if self.tree == None:
-            sys.exit('Set tree')
+            quit('Set tree')
 
         if ldmx_class == 'EventHeader': branch = r.ldmx.EventHeader()
         elif ldmx_class == 'EcalVetoResult': branch = r.ldmx.EcalVetoResult()
@@ -116,9 +115,9 @@ class TreeProcess:
         self.tree.SetBranchAddress(branch_name,r.AddressOf(branch))
 
         return branch
- 
+
     def run(self, strEvent=0, maxEvents=-1, pfreq=1000):
-  
+
         """ Run event_process on each event + any start/end funcitons """
 
         # Move into appropriate scratch dir
@@ -244,7 +243,7 @@ class TreeMaker:
             try:
                 self.branches[feat][0] = feats[feat]
             except:
-                sys.exit( str(feat) + ': ' + str(feats[feat]) )
+                quit( f'{feat}: {feats[feat]}' )
         self.tree.Fill()
 
     def wq(self):
@@ -257,110 +256,6 @@ class TreeMaker:
 ##################################################
 # Functions
 ##################################################
-
-def parse():
-
-    from glob import glob
-    from argparse import ArgumentParser
-
-    # Arguments
-    parser = ArgumentParser()
-    parser.add_argument(
-            'action',
-            default=None,
-            help='BDT actor string (trees, train, or eval)'
-            )
-    parser.add_argument(
-            'config',
-            help='BDT configuration file'
-            )
-    parser.add_argument(
-            '-p',
-            dest='mprocs',
-            nargs='+',
-            default=None,
-            help='Process names to be run from config e.g. pn, 1.0 (for sig)'
-            )
-    parser.add_argument(
-            '--batch',
-            dest='batch',
-            action='store_true',
-            default=False,
-            help='Run in batch mode [Default: False]'
-            )
-    parser.add_argument(
-            '-i',
-            dest='infiles',
-            nargs='+',
-            default=[],
-            help='input file(s)'
-            )
-    parser.add_argument(
-            '--indirs',
-            dest='indirs',
-            nargs='+',
-            default=[],
-            help='input directories (runs over all root files in directories)'
-            )
-    parser.add_argument(
-            '-g',
-            '-groupls',
-            dest='group_labels',
-            nargs='+',
-            default='',
-            help='Human readable sample labels e.g. for legends'
-            )
-    parser.add_argument(
-            '-o',
-            '--out',
-            dest='out',
-            nargs='+',
-            default=[],
-            help='output files or director(y/ies) of output files'
-            # if inputting directories, it's best to make a system
-            # for naming files in main() of main script
-            )
-    parser.add_argument(
-            '-s',
-            dest='startEvent',
-            type=int,
-            default=0,
-            help='event to start at'
-            )
-    parser.add_argument(
-            '-m',
-            dest='maxEvents',
-            type=int,
-            default=-1,
-            help='max events to run over for EACH group'
-            )
-    args = parser.parse_args()
-
-    # Input
-    if args.infiles != []:
-        inlist = [[f] for f in args.infiles] # Makes general loading easier
-    elif args.indirs != []:
-        inlist = [glob(indir + '/*.root') for indir in args.indirs]
-    else: inlist = []
-
-    # Output
-    if args.out != []:
-        outlist = args.out
-    else: outlist = []
-    
-    pdict = {
-            'action': args.action,
-            'config': args.config,
-            'mprocs': args.mprocs,
-            'batch': args.batch,
-            'inlist': inlist,
-            'groupls': args.group_labels,
-            'outlist': outlist,
-            'startEvent': args.startEvent,
-            'maxEvents': args.maxEvents
-            }
-
-    return pdict
 
 def load(group,treeName='LDMX_Events'):
 

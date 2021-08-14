@@ -1,20 +1,12 @@
 import sys
 from glob import glob
 from mods import feats
+from argparse import ArgumentParser
 from configparser import ConfigParser
 
-# NOTE: Add handling for batch outfile names in tConf
-
-def print_dict(d, prefix='', skip=set()):
-    
-    """ Print dictionary neatly (esp. useful for configurations) """
-
-    if prefix != '':
-        print(prefix)
-
-    for k,v in d.items():
-        if k not in skip:
-            print('{}: {}'.format(k,v))
+##################################################
+# Classes
+##################################################
 
 def tree_building_info(configFile):
 
@@ -114,7 +106,8 @@ def parse_bdt_config(action_str, configFile, clargs = {}):
                         strEvent = clargs['startEvent'],
                         maxEvents = clargs['maxEvents'],
                         pfreq = 1000,
-                        batch = clargs['batch']
+                        batch = clargs['batch'],
+                        ebeam = int( config.get('setup', 'ebeam') )
                         )
                 
                 tConf = TreeConfig(
@@ -214,7 +207,8 @@ def parse_batch_config(clargs):
                 strEvent = clargs['startEvent'],
                 maxEvents = clargs['maxEvents'],
                 pfreq = 1000,
-                batch = True
+                batch = True,
+                ebeam = int( config.get('setup', 'ebeam') )
                 )
 
         tConf = TreeConfig(
@@ -283,7 +277,7 @@ class ProcessConfig:
 
     """
     A container for TreeProcess confugrations
-    Might maka a method to parse config file here
+    Might make a method to parse config file here
     """
 
     def __init__(
@@ -298,7 +292,7 @@ class ProcessConfig:
             maxEvents = -1,
             pfreq = 1000,
             batch = False,
-            color = 1,
+            ebeam = 4,
             bdt = None # For eval processes
             ):
 
@@ -312,8 +306,8 @@ class ProcessConfig:
         self.maxEvents = maxEvents
         self.pfreq = pfreq
         self.batch = batch
-        self.color = color
         self.bdt = bdt
+        self.ebeam = ebeam
 
     def print(self):
 
@@ -356,3 +350,120 @@ class TreeConfig:
         """ Extra care for branches_info + it takes up a lot of space """
 
         print_dict( self.branches_info, prefix='\nFeatures:')
+
+##################################################
+# Functions
+##################################################
+
+def parse():
+
+    """ Parse commandline arguments for this BDT framework """
+
+    parser = ArgumentParser()
+    parser.add_argument(
+            'action',
+            default=None,
+            help='BDT actor string (trees, train, or eval)'
+            )
+    parser.add_argument(
+            'config',
+            help='BDT configuration file'
+            )
+    parser.add_argument(
+            '-p',
+            dest='mprocs',
+            nargs='+',
+            default=None,
+            help='Process names to be run from config e.g. pn, 1.0 (for sig)'
+            )
+    parser.add_argument(
+            '--batch',
+            dest='batch',
+            action='store_true',
+            default=False,
+            help='Run in batch mode [Default: False]'
+            )
+    parser.add_argument(
+            '-i',
+            dest='infiles',
+            nargs='+',
+            default=[],
+            help='input file(s)'
+            )
+    parser.add_argument(
+            '--indirs',
+            dest='indirs',
+            nargs='+',
+            default=[],
+            help='input directories (runs over all root files in directories)'
+            )
+    parser.add_argument(
+            '-g',
+            '-groupls',
+            dest='group_labels',
+            nargs='+',
+            default='',
+            help='Human readable sample labels e.g. for legends'
+            )
+    parser.add_argument(
+            '-o',
+            '--out',
+            dest='out',
+            nargs='+',
+            default=[],
+            help='output files or director(y/ies) of output files'
+            # if inputting directories, it's best to make a system
+            # for naming files in main() of main script
+            )
+    parser.add_argument(
+            '-s',
+            dest='startEvent',
+            type=int,
+            default=0,
+            help='event to start at'
+            )
+    parser.add_argument(
+            '-m',
+            dest='maxEvents',
+            type=int,
+            default=-1,
+            help='max events to run over for EACH group'
+            )
+    args = parser.parse_args()
+
+    # Input
+    if args.infiles != []:
+        inlist = [[f] for f in args.infiles] # Makes general loading easier
+    elif args.indirs != []:
+        inlist = [glob(indir + '/*.root') for indir in args.indirs]
+    else: inlist = []
+
+    # Output
+    if args.out != []:
+        outlist = args.out
+    else: outlist = []
+
+    pdict = {
+            'action': args.action,
+            'config': args.config,
+            'mprocs': args.mprocs,
+            'batch': args.batch,
+            'inlist': inlist,
+            'groupls': args.group_labels,
+            'outlist': outlist,
+            'startEvent': args.startEvent,
+            'maxEvents': args.maxEvents
+            }
+
+    return pdict
+
+def print_dict(d, prefix='', skip=set()):
+    
+    """ Print dictionary neatly (esp. useful for configurations) """
+
+    if prefix != '':
+        print(prefix)
+
+    for k,v in d.items():
+        if k not in skip:
+            print('{}: {}'.format(k,v))

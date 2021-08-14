@@ -8,7 +8,7 @@ ROOTgSystem.Load('libFramework.so')
 def main():
     
     # Parse command line args and init most important ones
-    pdict = manager.parse()
+    pdict = config.parse()
     action_str = pdict['action']
     configFile = pdict['config']
 
@@ -143,14 +143,12 @@ class BdtTreeMaker(manager.TreeProcess):
             for fun in funcs_list:
                 fun['func']( f_dict, fun['args'], store_dict, lq)
 
-        def doDetector(f_dict, det, lb_prefix):
+        def doDetector(f_dict, det, lb_prefix, d_store):
 
             """ Do all doFeatFuncs steps for a given detector """
 
-            store = {}
-
             # Init loop items
-            doFeatFuncs(f_dict, getattr(self, det + '_init'), store)
+            doFeatFuncs(f_dict, getattr(self, det + '_init'), d_store)
 
             if getattr(self, det + '_l1') != []:
 
@@ -161,19 +159,28 @@ class BdtTreeMaker(manager.TreeProcess):
 
                 # Loop over said branch while doing lfs
                 for hit in getattr(self, loop_branch):
-                    doFeatFuncs(f_dict, getattr(self, det + '_l1'), store, hit)
+                    doFeatFuncs(
+                                f_dict,
+                                getattr(self, det + '_l1'),
+                                d_store,
+                                hit
+                                )
 
                 # Do any intermediary functions
-                doFeatFuncs(f_dict, getattr(self, det + '_med'), store)
+                doFeatFuncs(f_dict, getattr(self, det + '_med'), d_store)
 
                 # Loop again if needed
                 if getattr(self, det + '_l2') != []:
                     for hit in getattr(self, loop_branch):
-                        doFeatFuncs(f_dict, getattr(self, det + '_l2'), store,
-                                    hit)
+                        doFeatFuncs(
+                                    f_dict,
+                                    getattr(self, det + '_l2'),
+                                    d_store,
+                                    hit
+                                    )
 
             # Any further det functions
-            doFeatFuncs(f_dict, getattr(self, det + '_closing'), store)
+            doFeatFuncs(f_dict, getattr(self, det + '_closing'), d_store)
 
         # Main event algorithm
         def event_process():
@@ -184,16 +191,22 @@ class BdtTreeMaker(manager.TreeProcess):
             feats = self.tfMaker.resetFeats()
 
             # Copy from input and other basiic assignments
-            doFeatFuncs(feats, self.init)
+            g_store = {'ebeam': proc_conf.pConfig.ebeam}
+            doFeatFuncs(feats, self.init, g_store)
+
+            # Tell detectors about info so far
+            tracker_store = {'globals': g_store}
+            ecal_store = tracker_store.copy()
+            hcal_store = tracker_store.copy()
 
             # Tracker
-            doDetector(feats, 'tracker', 'TrackerRecHits') # ?
+            doDetector(feats, 'tracker', 'TrackerRecHits', tracker_store) # ?
 
             # Ecal
-            doDetector(feats, 'ecal', 'EcalRecHits')
+            doDetector(feats, 'ecal', 'EcalRecHits', ecal_store)
 
             # Hcal
-            doDetector(feats, 'hcal', 'HcalRecHits')
+            doDetector(feats, 'hcal', 'HcalRecHits', hcal_store)
 
             # Any final closing functions
             doFeatFuncs(feats, self.closing)

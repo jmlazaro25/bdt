@@ -1,4 +1,5 @@
 import math
+import numpy as np
 from mods import physics
 import mods.ecal.main as emain
 
@@ -13,16 +14,108 @@ def segcont_init(f_dict, args, e_store, lq):
     """ Use recoilPMag and recoilTheta to select containment radii """
 
     # Set electron RoC binnings
-    e_store['e_radii'] = emain.radius68_thetalt10_plt500
-    if e_store['recoilTheta'] < 10 and e_store['recoilPMag'] >= 500:
-        e_store['e_radii'] = emain.radius68_thetalt10_pgt500
-    elif e_store['recoilTheta'] >= 10 and e_store['recoilTheta'] < 20:
-        e_store['e_radii'] = emain.radius68_theta10to20
+    if e_store['globals']['ebeam'] == 4:
+
+        e_store['e_radii'] = emain.radius68_thetalt10_plt500
+        if e_store['recoilTheta'] < 10 and e_store['recoilPMag'] >= 500:
+            e_store['e_radii'] = emain.radius68_thetalt10_pgt500
+        elif 10 <= e_store['recoilTheta'] < 20:
+            e_store['e_radii'] = emain.radius68_theta10to20
+        elif e_store['recoilTheta'] >= 20:
+            e_store['e_radii'] = emain.radius68_thetagt20
+
+        # Always use default binning for photon RoC
+        e_store['g_radii'] = emain.radius68_thetalt10_plt500
+        return
+
+    # If here, assuming 8 GeV
+    e_store['e_radii'] = emain.radius68_thetalt6_plt1000
+    if e_store['recoilTheta'] < 6 and e_store['recoilPMag'] >= 1000:
+        e_store['e_radii'] = emain.radius68_thetalt6_pgt1000
+    elif 6 <= e_store['recoilTheta'] < 20:
+        e_store['e_radii'] = emain.radius68_theta6to15
     elif e_store['recoilTheta'] >= 20:
         e_store['e_radii'] = emain.radius68_thetagt20
 
-    # Always use default binning for photon RoC
-    e_store['g_radii'] = emain.radius68_thetalt10_plt500
+    e_store['g_radii'] = emain.radius68_thetalt6_plt1000
+
+def prep_ecal_lfs(f_dict, args, e_store, lq):
+
+    """ Just add back_hits to store (othewise it'll keep being overwritten) """
+
+    e_store['ecal_hits'] = np.zeros(4)
+
+def collect(f_dict, args, e_store, ecalRecHit):
+
+    """ Collect ecal hit info in desired array format """
+
+    # Hit and energy-weighted hit (info) arrays
+    if not ecalRecHit.getEnergy() > 0: return
+
+    ecalRecHit = np.array( [
+                    ecalRecHit.getEnergy(),
+                    ecalRecHit.getXPos(),
+                    ecalRecHit.getYPos(),
+                    emain.layer(ecalRecHit)
+                    ] )
+
+    e_store['ecal_hits'] = np.vstack( (e_store['ecal_hits'], ecalRecHit) )
+
+def rsegcont(f_dict, args, e_store, lq):
+
+    """ Calculate relative segment features """
+
+    # Don't try if there are no hits
+    if type(e_store['ecal_hits'][0]) != np.ndarray: return
+
+    # Regional stats go here
+    hits1 = hits2 = hits3 = np.zeros(4)
+
+    # Group hits into regions
+    for ecalRecHit in e_store['ecal_hits'][1:]:
+        if ecalRecHit[3] < e_store['avgLayerHit']:
+            hits1 = np.vstack( (hits1, ecalRecHit) )
+        elif ecalRecHit[3] < e_store['avgLayerHit'] + f_dict['stdLayerHit']:
+            hits2 = np.vstack( (hits2, ecalRecHit) )
+        else:
+            hits3 = np.vstack( (hits3, ecalRecHit) )
+
+    # For each region, find averages, radii, etc.
+    regions = [0, hits1, hits2, hits3]
+    for s in range(1,4):
+        if type(regions[s][0]) == np.ndarray: # Make sure the region has any hits
+            f_dict[f'nHits_rs{s}'] = len( regions[s] ) - 1
+            f_dict[f'energy_rs{s}'] = sum( regions[s][1:,0] )
+            #if f_dict['back_tot_{}e_e'.format(i)] == 0: continue # Rounding round error
+            """
+            f_dict['back_tot_{}e_pe'.format(i)] = sum( regions[i][1:,4] )
+            f_dict['back_max_{}e_e'.format(i)] = max( regions[i][1:,0] )
+            f_dict['back_max_{}e_pe'.format(i)] = max( regions[i][1:,4] )
+            f_dict['back_avg_{}e_e'.format(i)] = np.mean( regions[i][1:,0] )
+            avg_e_x = np.average( regions[i][1:,1], weights = regions[i][1:,0] )
+            avg_e_y = np.average( regions[i][1:,2], weights = regions[i][1:,0] )
+            f_dict['back_avg_{}e_pe'.format(i)] = np.mean( regions[i][1:,0] )
+            f_dict['back_avg_{}e_r'.format(i)] = np.average(
+                    np.sqrt(
+                        (regions[i][1:,1]-avg_e_x)**2 +\
+                        (regions[i][1:,2]-avg_e_y)**2
+                        ),
+                    weights = regions[i][1:,0]
+                    )
+            if f_dict['back_nHits_{}e'.format(i)] > 1: # Std = 0 if there's only 1 hit
+                f_dict['back_std_{}e_e'.format(i)] = math.sqrt(
+                        sum((regions[i][1:,0] - f_dict['back_avg_{}e_e'.format(i)])**2)/\
+                            f_dict['back_nHits_{}e'.format(i)] )
+                f_dict['back_std_{}e_x'.format(i)] = math.sqrt( np.average(
+                    (regions[i][1:,1] - avg_e_x)**2,
+                    weights = regions[i][1:,0] ) )
+                f_dict['back_std_{}e_y'.format(i)] = math.sqrt( np.average(
+                    (regions[i][1:,2] - avg_e_y)**2,
+                    weights = regions[i][1:,0] ) )
+                f_dict['back_std_{}e_pe'.format(i)] = math.sqrt(
+                        sum((regions[i][1:,4] - f_dict['back_avg_{}e_pe'.format(i)])**2)/\
+                            f_dict['back_nHits_{}e'.format(i)] )
+            """
 
 def segcont_means(f_dict, args, e_store, ecalRecHit):
 
@@ -87,7 +180,7 @@ def segcont_means(f_dict, args, e_store, ecalRecHit):
                 f_dict['oContLayerMean_x{}_s{}'.format(r,s)] += layer*energy
 
 def segcont_means_norm(f_dict, args, e_store, lq):
-    
+
     """ Normalize mean calculations started in segcont_means """
 
     for s in range(1, nSegments + 1):

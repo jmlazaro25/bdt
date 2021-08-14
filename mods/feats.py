@@ -168,9 +168,6 @@ backv1_all_funcs = {
                             'priority': 30,
                             'brs': ()
                             },
-                        # HCalRecHits not technically used in this function
-                        # but it's got to be somewhere and this seems like
-                        # the best place
                         hcal.collect: {
                             'priority': 31,
                             'brs': (
@@ -183,7 +180,7 @@ backv1_all_funcs = {
                             }
                     }
 
-trees_info_backv1_all = { 
+trees_info_backv1_all = {
         'back_nHits':   {'rtype': int,   'default': 0.},
         'back_totE':    {'rtype': float, 'default': 0.},
         'back_totPE':   {'rtype': float, 'default': 0.},
@@ -191,7 +188,6 @@ trees_info_backv1_all = {
         'back_maxPE':   {'rtype': int,   'default': 0.},
         'back_avgE':    {'rtype': float, 'default': 0.},
         'back_avgPE':   {'rtype': float, 'default': 0.},
-        'back_avgR':    {'rtype': float, 'default': 0.},
         'back_std_e_x': {'rtype': float, 'default': 0.},
         'back_std_e_y': {'rtype': float, 'default': 0.},
         'back_std_e_z': {'rtype': float, 'default': 0.},
@@ -211,28 +207,25 @@ backv1_seg_funcs = {
                                 )
                             },
                         hcal.backv1_seg: {
-                            'priority': 33,
+                            'priority': 32,
                             'brs': ()
                             }
                     }
 
 trees_info_backv1_seg = {}
-for i in range(1, hcal.back_segments + 1):
+for s in range(1, hcal.back_segments + 1):
 
-    trees_info_backv1_seg['back_nHits_{}e'.format(i)]  = {'rtype': int,   'default': 0.}
-    trees_info_backv1_seg['back_tot_{}e_e'.format(i)]  = {'rtype': float, 'default': 0.}
-    trees_info_backv1_seg['back_tot_{}e_pe'.format(i)] = {'rtype': int,   'default': 0.}
-    trees_info_backv1_seg['back_max_{}e_e'.format(i)]  = {'rtype': float, 'default': 0.}
-    trees_info_backv1_seg['back_max_{}e_pe'.format(i)] = {'rtype': int,   'default': 0.}
-    trees_info_backv1_seg['back_avg_{}e_e'.format(i)]  = {'rtype': float, 'default': 0.}
-    #trees_info_backv1_seg['back_avg_{}e_x'.format(i)]  = {'rtype': float, 'default': 0.} # Maybe pT bias
-    #trees_info_backv1_seg['back_avg_{}e_y'.format(i)]  = {'rtype': float, 'default': 0.} # Don't train
-    trees_info_backv1_seg['back_avg_{}e_pe'.format(i)] = {'rtype': float, 'default': 0.}
-    trees_info_backv1_seg['back_avg_{}e_r'.format(i)]  = {'rtype': float, 'default': 0.}
-    trees_info_backv1_seg['back_std_{}e_e'.format(i)]  = {'rtype': float, 'default': 0.}
-    trees_info_backv1_seg['back_std_{}e_x'.format(i)]  = {'rtype': float, 'default': 0.}
-    trees_info_backv1_seg['back_std_{}e_y'.format(i)]  = {'rtype': float, 'default': 0.}
-    trees_info_backv1_seg['back_std_{}e_pe'.format(i)] = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg[f'back_nHits_{s}e']  = {'rtype': int,   'default': 0 }
+    trees_info_backv1_seg[f'back_tot_{s}e_e']  = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg[f'back_tot_{s}e_pe'] = {'rtype': int,   'default': 0 }
+    trees_info_backv1_seg[f'back_max_{s}e_e']  = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg[f'back_max_{s}e_pe'] = {'rtype': int,   'default': 0 }
+    trees_info_backv1_seg[f'back_avg_{s}e_e']  = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg[f'back_avg_{s}e_pe'] = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg[f'back_std_{s}e_e']  = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg[f'back_std_{s}e_x']  = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg[f'back_std_{s}e_y']  = {'rtype': float, 'default': 0.}
+    trees_info_backv1_seg[f'back_std_{s}e_pe'] = {'rtype': float, 'default': 0.}
 
 backv1_funcs = {
             **maxPE_funcs,
@@ -260,20 +253,17 @@ gabrielle_funcs = {
                         }
                 }
 
-for i in range(1, emain.contRegions + 1):
+for r in range(1, emain.contRegions + 1):
 
-    trees_info_gabrielle['electronContainmentEnergy_x{}'.format(i)] = {'rtype': float, 'default': 0 }
-    trees_info_gabrielle['photonContainmentEnergy_x{}'.format(i)]   = {'rtype': float, 'default': 0.}
-    trees_info_gabrielle['outsideContainmentEnergy_x{}'.format(i)]  = {'rtype': float, 'default': 0.}
-    trees_info_gabrielle['outsideContainmentNHits_x{}'.format(i)]   = {'rtype': int,   'default': 0 }
-    trees_info_gabrielle['outsideContainmentXStd_x{}'.format(i)]    = {'rtype': float, 'default': 0.}
-    trees_info_gabrielle['outsideContainmentYStd_x{}'.format(i)]    = {'rtype': float, 'default': 0.}
-
+    trees_info_gabrielle[f'electronContainmentEnergy_x{r}'] = {'rtype': float, 'default': 0 }
+    trees_info_gabrielle[f'photonContainmentEnergy_x{r}']   = {'rtype': float, 'default': 0.}
+    trees_info_gabrielle[f'outsideContainmentEnergy_x{r}']  = {'rtype': float, 'default': 0.}
+    trees_info_gabrielle[f'outsideContainmentNHits_x{r}']   = {'rtype': int,   'default': 0 }
+    trees_info_gabrielle[f'outsideContainmentXStd_x{r}']    = {'rtype': float, 'default': 0.}
+    trees_info_gabrielle[f'outsideContainmentYStd_x{r}']    = {'rtype': float, 'default': 0.}
 
 # SegCont
 ##################################################
-trees_info_segcont = trees_info_base_ecal.copy()
-
 segcont_funcs = {
             emain.ecal_init: {
                 'priority': 20,
@@ -308,50 +298,141 @@ segcont_funcs = {
                 }
         }
 
+trees_info_segcont = trees_info_base_ecal.copy()
 for s in range(1, segcont.nSegments + 1):
-    
+
     # Longitudinal segment features
-    trees_info_segcont['energy_s{}'.format(s)]    = {'rtype': float, 'default': 0.}
-    trees_info_segcont['nHits_s{}'.format(s)]     = {'rtype': int,   'default': 0 }
-    trees_info_segcont['xMean_s{}'.format(s)]     = {'rtype': float, 'default': 0.}
-    trees_info_segcont['yMean_s{}'.format(s)]     = {'rtype': float, 'default': 0.}
-    trees_info_segcont['layerMean_s{}'.format(s)] = {'rtype': float, 'default': 0.}
-    trees_info_segcont['xStd_s{}'.format(s)]      = {'rtype': float, 'default': 0.}
-    trees_info_segcont['yStd_s{}'.format(s)]      = {'rtype': float, 'default': 0.}
-    trees_info_segcont['layerStd_s{}'.format(s)]  = {'rtype': float, 'default': 0.}
+    trees_info_segcont[f'energy_s{s}']    = {'rtype': float, 'default': 0.}
+    trees_info_segcont[f'nHits_s{s}']     = {'rtype': int,   'default': 0 }
+    trees_info_segcont[f'xMean_s{s}']     = {'rtype': float, 'default': 0.}
+    trees_info_segcont[f'yMean_s{s}']     = {'rtype': float, 'default': 0.}
+    trees_info_segcont[f'layerMean_s{s}'] = {'rtype': float, 'default': 0.}
+    trees_info_segcont[f'xStd_s{s}']      = {'rtype': float, 'default': 0.}
+    trees_info_segcont[f'yStd_s{s}']      = {'rtype': float, 'default': 0.}
+    trees_info_segcont[f'layerStd_s{s}']  = {'rtype': float, 'default': 0.}
 
     for r in range(1, emain.contRegions + 1):
 
         # Electron RoC features
-        trees_info_segcont['eContEnergy_x{}_s{}'.format(r,s)]    = {'rtype': float, 'default': 0.}
-        trees_info_segcont['eContNHits_x{}_s{}'.format(r,s)]     = {'rtype': int,   'default': 0 }
-        trees_info_segcont['eContXMean_x{}_s{}'.format(r,s)]     = {'rtype': float, 'default': 0.}
-        trees_info_segcont['eContYMean_x{}_s{}'.format(r,s)]     = {'rtype': float, 'default': 0.}
-        trees_info_segcont['eContLayerMean_x{}_s{}'.format(r,s)] = {'rtype': float, 'default': 0.}
-        trees_info_segcont['eContXStd_x{}_s{}'.format(r,s)]      = {'rtype': float, 'default': 0.}
-        trees_info_segcont['eContYStd_x{}_s{}'.format(r,s)]      = {'rtype': float, 'default': 0.}
-        trees_info_segcont['eContLayerStd_x{}_s{}'.format(r,s)]  = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'eContEnergy_x{r}_s{s}']    = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'eContNHits_x{r}_s{s}']     = {'rtype': int,   'default': 0 }
+        trees_info_segcont[f'eContXMean_x{r}_s{s}']     = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'eContYMean_x{r}_s{s}']     = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'eContLayerMean_x{r}_s{s}'] = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'eContXStd_x{r}_s{s}']      = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'eContYStd_x{r}_s{s}']      = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'eContLayerStd_x{r}_s{s}']  = {'rtype': float, 'default': 0.}
 
         # Photon RoC features
-        trees_info_segcont['gContEnergy_x{}_s{}'.format(r,s)]    = {'rtype': float, 'default': 0.}
-        trees_info_segcont['gContNHits_x{}_s{}'.format(r,s)]     = {'rtype': int,   'default': 0 }
-        trees_info_segcont['gContXMean_x{}_s{}'.format(r,s)]     = {'rtype': float, 'default': 0.}
-        trees_info_segcont['gContYMean_x{}_s{}'.format(r,s)]     = {'rtype': float, 'default': 0.}
-        trees_info_segcont['gContLayerMean_x{}_s{}'.format(r,s)] = {'rtype': float, 'default': 0.}
-        trees_info_segcont['gContXStd_x{}_s{}'.format(r,s)]      = {'rtype': float, 'default': 0.}
-        trees_info_segcont['gContYStd_x{}_s{}'.format(r,s)]      = {'rtype': float, 'default': 0.}
-        trees_info_segcont['gContLayerStd_x{}_s{}'.format(r,s)]  = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'gContEnergy_x{r}_s{s}']    = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'gContNHits_x{r}_s{s}']     = {'rtype': int,   'default': 0 }
+        trees_info_segcont[f'gContXMean_x{r}_s{s}']     = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'gContYMean_x{r}_s{s}']     = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'gContLayerMean_x{r}_s{s}'] = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'gContXStd_x{r}_s{s}']      = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'gContYStd_x{r}_s{s}']      = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'gContLayerStd_x{r}_s{s}']  = {'rtype': float, 'default': 0.}
 
         # Outside RoC features
-        trees_info_segcont['oContEnergy_x{}_s{}'.format(r,s)]    = {'rtype': float, 'default': 0.}
-        trees_info_segcont['oContNHits_x{}_s{}'.format(r,s)]     = {'rtype': int,   'default': 0 }
-        trees_info_segcont['oContXMean_x{}_s{}'.format(r,s)]     = {'rtype': float, 'default': 0.}
-        trees_info_segcont['oContYMean_x{}_s{}'.format(r,s)]     = {'rtype': float, 'default': 0.}
-        trees_info_segcont['oContLayerMean_x{}_s{}'.format(r,s)] = {'rtype': float, 'default': 0.}
-        trees_info_segcont['oContXStd_x{}_s{}'.format(r,s)]      = {'rtype': float, 'default': 0.}
-        trees_info_segcont['oContYStd_x{}_s{}'.format(r,s)]      = {'rtype': float, 'default': 0.}
-        trees_info_segcont['oContLayerStd_x{}_s{}'.format(r,s)]  = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'oContEnergy_x{r}_s{s}']    = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'oContNHits_x{r}_s{s}']     = {'rtype': int,   'default': 0 }
+        trees_info_segcont[f'oContXMean_x{r}_s{s}']     = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'oContYMean_x{r}_s{s}']     = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'oContLayerMean_x{r}_s{s}'] = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'oContXStd_x{r}_s{s}']      = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'oContYStd_x{r}_s{s}']      = {'rtype': float, 'default': 0.}
+        trees_info_segcont[f'oContLayerStd_x{r}_s{s}']  = {'rtype': float, 'default': 0.}
 
+# RsegCont
+##################################################
+rsegcont_funcs = {
+            emain.base_rsegcont: {
+                'priority': 20,
+                'brs': (
+                    ('EcalVeto_'+pp, 'EcalVetoResult'),
+                    )
+                },
+            emain.ecal_init: {
+                'priority': 20,
+                'brs': (
+                    ('TargetScoringPlaneHits_'+pp, 'SimTrackerHit'),
+                    ('EcalScoringPlaneHits_'+pp, 'SimTrackerHit')
+                    )
+                },
+            segcont.segcont_init: {
+                'priority': 20.1,
+                'brs': ()
+                },
+            segcont.prep_ecal_lfs: {
+                'priority': 20.2,
+                'brs': ()
+                },
+            segcont.collect: {
+                'priority': 21,
+                'brs': (
+                    ('EcalRecHits_'+pp, 'EcalHit'),
+                    )
+                },
+            segcont.rsegcont: {
+                'priority': 22,
+                'brs': ()
+                }
+        }
+
+trees_info_rsegcont = {
+        'nReadoutHits':    {'rtype': int,   'default': 0 },
+        'summedDet':       {'rtype': float, 'default': 0.},
+        'summedTightIso':  {'rtype': float, 'default': 0.},
+        'maxCellDep':      {'rtype': float, 'default': 0.},
+        'showerRMS':       {'rtype': float, 'default': 0.},
+        'xStd':            {'rtype': float, 'default': 0.},
+        'yStd':            {'rtype': float, 'default': 0.},
+        'stdLayerHit':     {'rtype': float, 'default': 0.},
+        }
+
+for s in range(1, segcont.nSegments + 1):
+
+    # Longitudinal segment features
+    trees_info_rsegcont[f'energy_rs{s}']    = {'rtype': float, 'default': 0.}
+    trees_info_rsegcont[f'nHits_rs{s}']     = {'rtype': int,   'default': 0 }
+    """
+    trees_info_rsegcont[f'xMean_rs{s}']     = {'rtype': float, 'default': 0.}
+    trees_info_rsegcont[f'yMean_rs{s}']     = {'rtype': float, 'default': 0.}
+    trees_info_rsegcont[f'xStd_rs{s}']      = {'rtype': float, 'default': 0.}
+    trees_info_rsegcont[f'yStd_rs{s}']      = {'rtype': float, 'default': 0.}
+    trees_info_rsegcont[f'layerStd_rs{s}']  = {'rtype': float, 'default': 0.}
+    """
+
+    """
+    for r in range(1, emain.contRegions + 1):
+
+        # Electron RoC features
+        trees_info_rsegcont[f'eContEnergy_x{r}_rs{s}']    = {'rtype': float, 'default': 0.}
+        trees_info_rsegcont[f'eContNHits_x{r}_rs{s}']     = {'rtype': int,   'default': 0 }
+        trees_info_rsegcont[f'eContXMean_x{r}_rs{s}']     = {'rtype': float, 'default': 0.}
+        trees_info_rsegcont[f'eContYMean_x{r}_rs{s}']     = {'rtype': float, 'default': 0.}
+        trees_info_rsegcont[f'eContXStd_x{r}_rs{s}']      = {'rtype': float, 'default': 0.}
+        trees_info_rsegcont[f'eContYStd_x{r}_rs{s}']      = {'rtype': float, 'default': 0.}
+        trees_info_rsegcont[f'eContLayerStd_x{r}_rs{s}']  = {'rtype': float, 'default': 0.}
+
+        # Photon RoC features
+        trees_info_rsegcont[f'gContEnergy_x{r}_rs{s}']    = {'rtype': float, 'default': 0.}
+        trees_info_rsegcont[f'gContNHits_x{r}_rs{s}']     = {'rtype': int,   'default': 0 }
+        trees_info_rsegcont[f'gContXMean_x{r}_rs{s}']     = {'rtype': float, 'default': 0.}
+        trees_info_rsegcont[f'gContYMean_x{r}_rs{s}']     = {'rtype': float, 'default': 0.}
+        trees_info_rsegcont[f'gContXStd_x{r}_rs{s}']      = {'rtype': float, 'default': 0.}
+        trees_info_rsegcont[f'gContYStd_x{r}_rs{s}']      = {'rtype': float, 'default': 0.}
+        trees_info_rsegcont[f'gContLayerStd_x{r}_rs{s}']  = {'rtype': float, 'default': 0.}
+
+        # Outside RoC features
+        trees_info_rsegcont[f'oContEnergy_x{r}_rs{s}']    = {'rtype': float, 'default': 0.}
+        trees_info_rsegcont[f'oContNHits_x{r}_rs{s}']     = {'rtype': int,   'default': 0 }
+        trees_info_rsegcont[f'oContXMean_x{r}_rs{s}']     = {'rtype': float, 'default': 0.}
+        trees_info_rsegcont[f'oContYMean_x{r}_rs{s}']     = {'rtype': float, 'default': 0.}
+        trees_info_rsegcont[f'oContXStd_x{r}_rs{s}']      = {'rtype': float, 'default': 0.}
+        trees_info_rsegcont[f'oContYStd_x{r}_rs{s}']      = {'rtype': float, 'default': 0.}
+        trees_info_rsegcont[f'oContLayerStd_x{r}_rs{s}']  = {'rtype': float, 'default': 0.}
+    """
 
 # mipTracking
 ##################################################
@@ -424,7 +505,7 @@ feats_analysis = trees_info_analysis
 # Tracker
 
 # Hcal
-feats_maxPE = trees_info_maxPE 
+feats_maxPE = trees_info_maxPE
 
 feats_backv1_all = trees_info_backv1_all
 
@@ -614,7 +695,7 @@ feats_segmipv4 = {
     }
 
 # segmipx is the intersection of segmipv3 and segmipv4
-feats_segmipx = { 
+feats_segmipx = {
                     feat: info for feat, info in feats_segmipv3.items() \
                         if feat in feats_segmipv4
         }
