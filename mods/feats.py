@@ -392,18 +392,15 @@ trees_info_rsegcont = {
 
 for s in range(1, segcont.nSegments + 1):
 
-    # Longitudinal segment features
+    # Longitudinal segment features Should probably remove x/yMeans for pT bias
     trees_info_rsegcont[f'energy_rs{s}']    = {'rtype': float, 'default': 0.}
     trees_info_rsegcont[f'nHits_rs{s}']     = {'rtype': int,   'default': 0 }
-    """
     trees_info_rsegcont[f'xMean_rs{s}']     = {'rtype': float, 'default': 0.}
     trees_info_rsegcont[f'yMean_rs{s}']     = {'rtype': float, 'default': 0.}
     trees_info_rsegcont[f'xStd_rs{s}']      = {'rtype': float, 'default': 0.}
     trees_info_rsegcont[f'yStd_rs{s}']      = {'rtype': float, 'default': 0.}
     trees_info_rsegcont[f'layerStd_rs{s}']  = {'rtype': float, 'default': 0.}
-    """
 
-    """
     for r in range(1, emain.contRegions + 1):
 
         # Electron RoC features
@@ -432,7 +429,6 @@ for s in range(1, segcont.nSegments + 1):
         trees_info_rsegcont[f'oContXStd_x{r}_rs{s}']      = {'rtype': float, 'default': 0.}
         trees_info_rsegcont[f'oContYStd_x{r}_rs{s}']      = {'rtype': float, 'default': 0.}
         trees_info_rsegcont[f'oContLayerStd_x{r}_rs{s}']  = {'rtype': float, 'default': 0.}
-    """
 
 # mipTracking
 ##################################################

@@ -1,6 +1,8 @@
 import math
 import numpy as np
+import awkward as ak
 from mods import physics
+from copy import deepcopy
 import mods.ecal.main as emain
 
 # Constants
@@ -43,7 +45,7 @@ def prep_ecal_lfs(f_dict, args, e_store, lq):
 
     """ Just add back_hits to store (othewise it'll keep being overwritten) """
 
-    e_store['ecal_hits'] = np.zeros(4)
+    e_store['ecal_hits'] = []
 
 def collect(f_dict, args, e_store, ecalRecHit):
 
@@ -59,63 +61,228 @@ def collect(f_dict, args, e_store, ecalRecHit):
                     emain.layer(ecalRecHit)
                     ] )
 
-    e_store['ecal_hits'] = np.vstack( (e_store['ecal_hits'], ecalRecHit) )
+    e_store['ecal_hits'].append( ecalRecHit )
 
 def rsegcont(f_dict, args, e_store, lq):
 
     """ Calculate relative segment features """
 
-    # Don't try if there are no hits
-    if type(e_store['ecal_hits'][0]) != np.ndarray: return
+    # Exclusive catagories in each containment region set
+    cont = [[],[],[],[]] # [both, electron, gamma, outside]
 
-    # Regional stats go here
-    hits1 = hits2 = hits3 = np.zeros(4)
+    # Each rseg is a collection of multiples of cont (and there's 3 of them)
+    rseg = [ deepcopy(cont) for _ in range(emain.contRegions) ]
+    rsegs = [ deepcopy(rseg) for _ in range(nSegments) ]
 
-    # Group hits into regions
-    for ecalRecHit in e_store['ecal_hits'][1:]:
-        if ecalRecHit[3] < e_store['avgLayerHit']:
-            hits1 = np.vstack( (hits1, ecalRecHit) )
-        elif ecalRecHit[3] < e_store['avgLayerHit'] + f_dict['stdLayerHit']:
-            hits2 = np.vstack( (hits2, ecalRecHit) )
+    # Final struct note:
+    # Relative_segments (3 for now)                                   (layer 1)
+    # Each contain emain.ncontRegions (i.e. _x1, _x2, ..., _xn)       (layer 2)
+    # Each _xi contains catagories (both, electron, gamma, outside)   (layer 3)
+    # Each catagory contains hits (n of them)                         (layer 4)
+    # Each hit is [energy, x, y, layer] (Ideally try z at some point) (layer 5)
+
+    # Fill relative segments (and sub-arrays)
+    for ecalRecHit in e_store['ecal_hits']:
+
+        # Choose rsegment
+        layer = int( ecalRecHit[3] )
+        if layer < e_store['avgLayerHit']: 
+            rseg_i = 0
+        elif layer < e_store['avgLayerHit'] + f_dict['stdLayerHit']:
+            rseg_i = 1
         else:
-            hits3 = np.vstack( (hits3, ecalRecHit) )
+            rseg_i = 2
 
-    # For each region, find averages, radii, etc.
-    regions = [0, hits1, hits2, hits3]
-    for s in range(1,4):
-        if type(regions[s][0]) == np.ndarray: # Make sure the region has any hits
-            f_dict[f'nHits_rs{s}'] = len( regions[s] ) - 1
-            f_dict[f'energy_rs{s}'] = sum( regions[s][1:,0] )
-            #if f_dict['back_tot_{}e_e'.format(i)] == 0: continue # Rounding round error
-            """
-            f_dict['back_tot_{}e_pe'.format(i)] = sum( regions[i][1:,4] )
-            f_dict['back_max_{}e_e'.format(i)] = max( regions[i][1:,0] )
-            f_dict['back_max_{}e_pe'.format(i)] = max( regions[i][1:,4] )
-            f_dict['back_avg_{}e_e'.format(i)] = np.mean( regions[i][1:,0] )
-            avg_e_x = np.average( regions[i][1:,1], weights = regions[i][1:,0] )
-            avg_e_y = np.average( regions[i][1:,2], weights = regions[i][1:,0] )
-            f_dict['back_avg_{}e_pe'.format(i)] = np.mean( regions[i][1:,0] )
-            f_dict['back_avg_{}e_r'.format(i)] = np.average(
-                    np.sqrt(
-                        (regions[i][1:,1]-avg_e_x)**2 +\
-                        (regions[i][1:,2]-avg_e_y)**2
-                        ),
-                    weights = regions[i][1:,0]
+        # Distance to electron trajectory
+        if e_store['e_traj'] != None:
+            xy_e_traj = (
+                            e_store['e_traj'][layer][0],
+                            e_store['e_traj'][layer][1]
+                            )
+            distance_e_traj = physics.dist( ecalRecHit[1:3] , xy_e_traj )
+        else: distance_e_traj = -1.0
+
+        # Distance to photon trajectory
+        if e_store['g_traj'] != None:
+            xy_g_traj = (
+                            e_store['g_traj'][layer][0],
+                            e_store['g_traj'][layer][1]
+                            )
+            distance_g_traj = physics.dist( ecalRecHit[1:3] , xy_g_traj )
+        else: distance_g_traj = -1.0
+
+        # Choose region(s)
+        for r in range( emain.contRegions ):
+
+            eRegion = gRegion = False
+
+            if r*e_store['e_radii'][layer] <= distance_e_traj \
+                    < (r + 1)*e_store['e_radii'][layer]:
+                eRegion = True
+
+            if r*e_store['g_radii'][layer] <= distance_g_traj \
+                    < (r + 1)*e_store['g_radii'][layer]:
+                gRegion = True
+
+            # Do the actual filling
+            if eRegion and gRegion: rsegs[rseg_i][r][0].append( ecalRecHit )
+            elif eRegion: rsegs[rseg_i][r][1].append( ecalRecHit )
+            elif gRegion: rsegs[rseg_i][r][2].append( ecalRecHit )
+            else: rsegs[rseg_i][r][3].append( ecalRecHit )
+
+    # For each section and region, find averages, stds, etc.
+    # Probably should make a std function fo avoid the blocks below (lol)
+    rsegs = ak.Array( rsegs )
+    for s, rseg in enumerate(rsegs):
+
+        # Overall segments Should probably remove x/yMeans for pT bias
+        f_dict[f'nHits_rs{s + 1}'] = ak.count( rseg[0] ) // 4
+        if f_dict[f'nHits_rs{s + 1}'] == 0: continue
+        f_dict[f'energy_rs{s + 1}'] = ak.sum( rseg[0,:,:,0] )
+        f_dict[f'xMean_rs{s + 1}'] = ak.mean( rseg[0,:,:,1], rseg[0,:,:,0] )
+        f_dict[f'yMean_rs{s + 1}'] = ak.mean( rseg[0,:,:,2], rseg[0,:,:,0] )
+        layer_mean_rs = ak.mean( rseg[0,:,:,3], rseg[0,:,:,0] )
+        f_dict[f'xStd_rs{s + 1}'] = math.sqrt(
+                ak.mean(
+                    (rseg[0,:,:,1] - f_dict[f'xMean_rs{s + 1}'])**2,
+                    weight = rseg[0,:,:,0]
                     )
-            if f_dict['back_nHits_{}e'.format(i)] > 1: # Std = 0 if there's only 1 hit
-                f_dict['back_std_{}e_e'.format(i)] = math.sqrt(
-                        sum((regions[i][1:,0] - f_dict['back_avg_{}e_e'.format(i)])**2)/\
-                            f_dict['back_nHits_{}e'.format(i)] )
-                f_dict['back_std_{}e_x'.format(i)] = math.sqrt( np.average(
-                    (regions[i][1:,1] - avg_e_x)**2,
-                    weights = regions[i][1:,0] ) )
-                f_dict['back_std_{}e_y'.format(i)] = math.sqrt( np.average(
-                    (regions[i][1:,2] - avg_e_y)**2,
-                    weights = regions[i][1:,0] ) )
-                f_dict['back_std_{}e_pe'.format(i)] = math.sqrt(
-                        sum((regions[i][1:,4] - f_dict['back_avg_{}e_pe'.format(i)])**2)/\
-                            f_dict['back_nHits_{}e'.format(i)] )
-            """
+                )
+        f_dict[f'yStd_rs{s + 1}'] = math.sqrt(
+                ak.mean(
+                    (rseg[0,:,:,2] - f_dict[f'yMean_rs{s + 1}'])**2,
+                    weight = rseg[0,:,:,0]
+                    )
+                )
+        f_dict[f'layerStd_rs{s + 1}'] = math.sqrt(
+                ak.mean(
+                    (rseg[0,:,:,3] - layer_mean_rs)**2,
+                    weight = rseg[0,:,:,0]
+                    )
+                )
+
+        # Regions in each segment
+        for r, reg in enumerate(rseg):
+
+            # Electron category of region
+            cat = ak.concatenate( (reg[0], reg[1]) )
+            f_dict[f'eContNHits_x{r + 1}_rs{s + 1}'] = ak.count( cat ) // 4
+            if f_dict[f'eContNHits_x{r + 1}_rs{s + 1}'] != 0:
+                f_dict[f'eContEnergy_x{r + 1}_rs{s + 1}'] = ak.sum( cat[:,0] )
+                f_dict[f'eContXMean_x{r + 1}_rs{s + 1}'] = ak.mean(
+                                                                    cat[:,1],
+                                                                    cat[:,0]
+                                                                    )
+                f_dict[f'eContYMean_x{r + 1}_rs{s + 1}'] = ak.mean(
+                                                                    cat[:,2],
+                                                                    cat[:,0]
+                                                                    )
+                layer_mean_x_rs = ak.mean( cat[:,3], cat[:,0] )
+                f_dict[f'eContXStd_x{r + 1}_rs{s + 1}'] = math.sqrt(
+                        ak.mean(
+                            (
+                                cat[:,1] \
+                                - f_dict[f'eContXMean_x{r + 1}_rs{s + 1}']
+                                )**2,
+                            weight = cat[:,0]
+                            )
+                        )
+                f_dict[f'eContYStd_x{r + 1}_rs{s + 1}'] = math.sqrt(
+                        ak.mean(
+                            (
+                                cat[:,2] \
+                                - f_dict[f'eContYMean_x{r + 1}_rs{s + 1}']
+                                )**2,
+                            weight = cat[:,0]
+                            )
+                        )
+                f_dict[f'eContLayerStd_x{r + 1}_rs{s + 1}'] = math.sqrt(
+                        ak.mean(
+                            (cat[:,3] - layer_mean_x_rs)**2,
+                            weight = cat[:,0]
+                            )
+                        )
+
+            # Gamma category of region
+            cat = ak.concatenate( (reg[0], reg[2]) )
+            f_dict[f'gContNHits_x{r + 1}_rs{s + 1}'] = ak.count( cat ) // 4
+            if f_dict[f'gContNHits_x{r + 1}_rs{s + 1}'] != 0:
+                f_dict[f'gContEnergy_x{r + 1}_rs{s + 1}'] = ak.sum( cat[:,0] )
+                f_dict[f'gContXMean_x{r + 1}_rs{s + 1}'] = ak.mean(
+                                                                    cat[:,1],
+                                                                    cat[:,0]
+                                                                    )
+                f_dict[f'gContYMean_x{r + 1}_rs{s + 1}'] = ak.mean(
+                                                                    cat[:,2],
+                                                                    cat[:,0]
+                                                                    )
+                layer_mean_x_rs = ak.mean( cat[:,3], cat[:,0] )
+                f_dict[f'gContXStd_x{r + 1}_rs{s + 1}'] = math.sqrt(
+                        ak.mean(
+                            (
+                                cat[:,1] \
+                                - f_dict[f'gContXMean_x{r + 1}_rs{s + 1}']
+                                )**2,
+                            weight = cat[:,0]
+                            )
+                        )
+                f_dict[f'gContYStd_x{r + 1}_rs{s + 1}'] = math.sqrt(
+                        ak.mean(
+                            (
+                                cat[:,2] \
+                                - f_dict[f'gContYMean_x{r + 1}_rs{s + 1}']
+                                )**2,
+                            weight = cat[:,0]
+                            )
+                        )
+                f_dict[f'gContLayerStd_x{r + 1}_rs{s + 1}'] = math.sqrt(
+                        ak.mean(
+                            (cat[:,3] - layer_mean_x_rs)**2,
+                            weight = cat[:,0]
+                            )
+                        )
+
+            # Outside category of region
+            f_dict[f'oContNHits_x{r + 1}_rs{s + 1}'] = ak.count( cat ) // 4
+            if f_dict[f'oContNHits_x{r + 1}_rs{s + 1}'] != 0:
+                f_dict[f'oContEnergy_x{r + 1}_rs{s + 1}'] = ak.sum(reg[3,:,0])
+                f_dict[f'oContXMean_x{r + 1}_rs{s + 1}'] = ak.mean(
+                                                                    reg[3,:,1],
+                                                                    reg[3,:,0]
+                                                                    )
+                f_dict[f'oContYMean_x{r + 1}_rs{s + 1}'] = ak.mean(
+                                                                    reg[3,:,2],
+                                                                    reg[3,:,0]
+                                                                    )
+                layer_mean_x_rs = ak.mean( reg[3,:,3], reg[3,:,0] )
+                f_dict[f'oContXStd_x{r + 1}_rs{s + 1}'] = math.sqrt(
+                        ak.mean(
+                            (
+                                reg[3,:,1] \
+                                - f_dict[f'oContXMean_x{r + 1}_rs{s + 1}']
+                                )**2,
+                            weight = reg[3,:,0]
+                            )
+                        )
+                f_dict[f'oContYStd_x{r + 1}_rs{s + 1}'] = math.sqrt(
+                        ak.mean(
+                            (
+                                reg[3,:,2] \
+                                - f_dict[f'oContYMean_x{r + 1}_rs{s + 1}']
+                                )**2,
+                            weight = reg[3,:,0]
+                            )
+                        )
+                f_dict[f'oContLayerStd_x{r + 1}_rs{s + 1}'] = math.sqrt(
+                        ak.mean(
+                            (reg[3,:,3] - layer_mean_x_rs)**2,
+                            weight = reg[3,:,0]
+                            )
+                        )
+
+    # Don't carry around hitinfo after this
+    del e_store['ecal_hits']
+    del rsegs
 
 def segcont_means(f_dict, args, e_store, ecalRecHit):
 
