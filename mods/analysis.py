@@ -25,6 +25,26 @@ def trigger(f_dict, args, x_store, lq):
 
     f_dict['trigPass'] = next( iter( args.values ) ).passed()
 
+'''
+def recoil_tracks(f_dict, args, e_store, lq):
+
+    """ Number of tracks and their eneries """
+    # Consider minimu pmag to count
+
+    n_recoil_tracks = 0
+    max_pmag = 0
+    for ecalSPHit in next( iter( args.values() ) ):
+
+            if ecalSPHit.getCharge() == 0: continue
+
+            n_recoil_tracks += 1
+            if physics.mag( ecalSPHit.getMomentum() ) > max_pmag:
+                max_pmag = physics.mag( ecalSPHit.getMomentum() )
+
+    f_dict['n_recoil_tracks'] = n_recoil_tracks
+    f_dict['max_track_pmag'] = max_pmag
+'''
+
 def recoilPT(f_dict, args, e_store, lq):
 
     """ Save recoilPMag from ecal_init to tree """
