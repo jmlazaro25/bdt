@@ -1,4 +1,4 @@
-import sys
+from os import path
 import mods.ROOTmanager as manager
 import mods.configuration as config
 import ROOT.gSystem as ROOTgSystem
@@ -15,14 +15,14 @@ def main():
     if action_str == 'trees': actor = BdtTreeMaker
     elif action_str == 'train': actor = BdtTrainer
     elif action_str == 'eval': actor = BdtEval
-    else: sys.exit('\nProvide a valid action')
+    else: quit('\nProvide a valid action')
 
     print('\nUsing {} action from conf file: {}'.format(action_str,configFile))
 
     # If batch, just do the thing and exit
     if pdict['batch'] and action_str != 'train':
         actor( config.parse_batch_config(pdict) ).run()
-        sys.exit('\nDONE!')
+        quit('\nDONE!')
 
     # Parse an print Config and (Overrides parse options if provided in both)
     # Maybe give an overriding message in these cases
@@ -237,6 +237,21 @@ class BdtTrainer():
         for k,v in conf_dict.items():
             setattr(self, k, v)
 
+        # Warning if things haven't been hadded
+        # Could use normal TChain method (as suggested by use of 'dir') but nah
+        # Forcing hadding is good incase things crash anyway
+        self.sets = ('bkg', 'sig')
+        for st in self.sets:
+            thingy = getattr(self, f'{st}_indir')
+            if not path.exists(thingy):
+                quit(
+                        f'{getattr(self, f"{st}_indir")} does NOT exist'
+                        + 'Lemme help, try:\n'
+                        + f'ldmx hadd {thingy} '
+                        + f'{ "/".join(thingy.split("/")[:-1]) }/{{{st}}}/*'
+                        + '\nand then try me again'
+                        )
+
         # Yet another conf dictionary
         self.params_dict = {
                 "objective": "binary:logistic",
@@ -272,8 +287,7 @@ class BdtTrainer():
         plt.use('Agg')
 
         # Organize data for training
-        sets = ('bkg', 'sig')
-        for st in sets:
+        for st in self.sets:
 
             # Load tree
             tree = manager.load(
@@ -355,6 +369,11 @@ class BdtEval(manager.TreeProcess):
         import numpy as np
         import pickle as pkl
         import xgboost as xgb
+        from mods.feats import trees_info_analysis
+
+        # Pretty much always want to pass this for bias plots
+        # Could be handled better, but skipping the config is nice
+        analysis_vars = tuple( trees_info_analysis.keys() )
 
         # Set bdt
         self.bdt = pkl.load( open( proc_conf.pConfig.bdt, 'rb' ) )
@@ -363,22 +382,26 @@ class BdtEval(manager.TreeProcess):
         for k in self.tfMaker.branches_info.keys():
             if k[:9] == 'discValue': discValue_name = k
 
+        # Don't try to include these in the list given to self.bdt.predict
+        no_eval = (*analysis_vars, discValue_name)
+
         # Main event algorithm
         def event_process():
 
             # Collect features from this event
             feats = []
             for feat in self.tfMaker.branches_info:
-                if feat != discValue_name:
-                    feats.append( getattr( self.tree, feat ) )
+                if feat in no_eval: continue
+                feats.append( getattr( self.tree, feat ) )
 
-            # Copy features to new tree
-            for f_name, f_value in zip(self.tfMaker.branches_info, feats):
-                self.tfMaker.branches[f_name][0] = f_value
+            # Copy existing variables to new tree
+            for f_name in self.tfMaker.branches_info.keys():
+                if f_name == discValue_name: continue
+                self.tfMaker.branches[f_name][0] = getattr( self.tree, f_name )
 
             # Add prediction to new tree
             evtarray = np.array([feats])
-            self.tfMaker.branches[discValue_name][0] =\
+            self.tfMaker.branches[discValue_name][0] = \
                     float( self.bdt.predict( xgb.DMatrix(evtarray) )[0] )
 
             # Fill new tree with current event values

@@ -93,6 +93,8 @@ class TreeProcess:
             # Add input branaches as attributes
             if self.branches != None:
                 for btup in self.branches:
+                    # I keep having to add this for debugging so shall liv here
+                    #print(btup)
                     setattr(self, btup[0], self.addBranch(btup[1], btup[0]))
 
             # Move back to cwd in case running multiple procs
@@ -112,7 +114,8 @@ class TreeProcess:
         elif ldmx_class == 'SimParticle': branch = r.map(int, 'ldmx::'+ldmx_class)()
         else: branch = r.std.vector('ldmx::'+ldmx_class)()
 
-        self.tree.SetBranchAddress(branch_name,r.AddressOf(branch))
+        try: self.tree.SetBranchAddress(branch_name,r.AddressOf(branch))
+        except: quit( f'Problem with br: {branch_name}, class: {ldmx_class}' )
 
         return branch
 

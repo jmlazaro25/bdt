@@ -1,5 +1,8 @@
 flats/
 samples/
+triggerStuff/*.png
+triggerStuff/*.root
+triggerStuff/*/
 confs/local_*
 *_bdt/
 mods/__pycache__/

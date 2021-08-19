@@ -152,6 +152,7 @@ def parse_bdt_config(action_str, configFile, clargs = {}):
 
         # Overwrite branches_info and Add discValue
         branches_info, name = feature_info(configFile)
+        branches_info.update( getattr(feats, 'trees_info_analysis') )
         branches_info[ 'discValue_'+name ] = { 'rtype': float, 'default': 0.5 }
 
         for proc in procs:
@@ -167,7 +168,8 @@ def parse_bdt_config(action_str, configFile, clargs = {}):
                         maxEvents = clargs['maxEvents'],
                         pfreq = 1000,
                         batch = clargs['batch'],
-                        bdt = config.get('eval', 'bdt')
+                        bdt = config.get('eval', 'bdt'),
+                        ebeam = int( config.get('setup', 'ebeam') )
                         )
 
                 tConf = TreeConfig(
@@ -228,6 +230,7 @@ def parse_batch_config(clargs):
 
         # Overwrite branches_info and add discValue
         branches_info, name = feature_info(clargs['config'])
+        branches_info.update( getattr(feats, 'trees_info_analysis') )
         branches_info[ 'discValue_'+name ] = { 'rtype': float, 'default': 0.5 }
 
         pConf = ProcessConfig(
@@ -238,7 +241,8 @@ def parse_batch_config(clargs):
                 maxEvents = clargs['maxEvents'],
                 pfreq = 1000,
                 batch = clargs['batch'],
-                bdt = config.get('eval', 'bdt')
+                bdt = config.get('eval', 'bdt'),
+                ebeam = int( config.get('setup', 'ebeam') )
                 )
 
         tConf = TreeConfig(

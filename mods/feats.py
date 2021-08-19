@@ -56,7 +56,7 @@ from mods.ecal import segcont
 from mods.ecal import mipTracking
 from mods.ecal import main as emain
 
-# Production process label
+# Production process label (definatley going into config ... eventually)
 pp = 'v12'
 
 ##################################################
@@ -71,6 +71,12 @@ analysis_funcs = {
                     #        'brs:' (
                     #            ('Trigger_'+pp, 'TriggerResult'),
                     #            )
+                    #    },
+                    #analysis.recoil_tracks: {
+                    #    'priority': 0,
+                    #    'brs': (
+                    #        ('EcalScoringPlaneHits_'+pp, 'SimTrackerHit'),
+                    #        )
                     #    },
                     emain.ecal_init: {
                         'priority': 20,
@@ -96,13 +102,15 @@ analysis_funcs = {
         }
 
 trees_info_analysis = {
-            'e_fid':    {'rtype': bool, 'default': False},
-            'g_fid':    {'rtype': bool, 'default': False},
-            'recoilPT': {'rtype': float,'default': None },
-            'Ap_dt':    {'rtype': float,'default': None },
-            'Ap_dx':    {'rtype': float,'default': None },
-            'Ap_dy':    {'rtype': float,'default': None },
-            'Ap_dz':    {'rtype': float,'default': None },
+            #'n_recoil_tracks': {'rtype': int,  'default': None },
+            #'max_track_pman':  {'rtype': int,  'default': None },
+            'e_fid':           {'rtype': bool, 'default': False},
+            'g_fid':           {'rtype': bool, 'default': False},
+            'recoilPT':        {'rtype': float,'default': None },
+            'Ap_dt':           {'rtype': float,'default': None },
+            'Ap_dx':           {'rtype': float,'default': None },
+            'Ap_dy':           {'rtype': float,'default': None },
+            'Ap_dz':           {'rtype': float,'default': None },
         }
 
 # Base stuff (mostly) for testing
@@ -694,4 +702,120 @@ feats_segmipv4 = {
 feats_segmipx = {
                     feat: info for feat, info in feats_segmipv3.items() \
                         if feat in feats_segmipv4
-        }
+    }
+
+# Make rsegmip dicts smartly
+feats_rsegmipv3 = {
+
+            # Base features
+            'nReadoutHits':    {'rtype': int,   'default': 0 },
+            'summedDet':       {'rtype': float, 'default': 0.},
+            'summedTightIso':  {'rtype': float, 'default': 0.},
+            'maxCellDep':      {'rtype': float, 'default': 0.},
+            'showerRMS':       {'rtype': float, 'default': 0.},
+            'xStd':            {'rtype': float, 'default': 0.},
+            'yStd':            {'rtype': float, 'default': 0.},
+            'stdLayerHit':     {'rtype': float, 'default': 0.},
+
+            # MIP tracking features
+            'straight4':                 {'rtype': int,   'default': 0 },
+            'firstNearPhLayer':          {'rtype': int,   'default': 33},
+            'nNearPhHits':               {'rtype': int,   'default': 0 },
+            'photonTerritoryHits':       {'rtype': int,   'default': 0 },
+            'epSep':                     {'rtype': float, 'default': 0.},
+            'epDot':                     {'rtype': float, 'default': 0.},
+    }
+for k,v in feats_segmipv3.items():
+    if '_s' in k:
+        candidate_k = k.replace('_s','_rs')
+        if candidate_k in trees_info_rsegcont:
+            feats_rsegmipv3[ candidate_k ] = v
+
+feats_rsegmipv4 = {
+
+            # Base features
+            'nReadoutHits':    {'rtype': int,   'default': 0 },
+            'summedDet':       {'rtype': float, 'default': 0.},
+            'summedTightIso':  {'rtype': float, 'default': 0.},
+            'maxCellDep':      {'rtype': float, 'default': 0.},
+            'showerRMS':       {'rtype': float, 'default': 0.},
+            'xStd':            {'rtype': float, 'default': 0.},
+            'yStd':            {'rtype': float, 'default': 0.},
+            'stdLayerHit':     {'rtype': float, 'default': 0.},
+
+            # MIP Tracking features
+            **feats_mipTracking,
+    }
+for k,v in feats_segmipv4.items():
+    if '_s' in k:
+        candidate_k = k.replace('_s','_rs')
+        if candidate_k in trees_info_rsegcont:
+            feats_rsegmipv4[ candidate_k ] = v
+
+feats_rsegmipx = {
+                    feat: info for feat, info in feats_rsegmipv3.items() \
+                        if feat in feats_rsegmipv4
+    }
+
+"""
+            # Longitudinal segment features
+            'energy_rs1':                 {'rtype': float, 'default': 0.},
+            'xMean_rs1':                  {'rtype': float, 'default': 0.},
+            'yMean_rs1':                  {'rtype': float, 'default': 0.},
+            'layerMean_rs1':              {'rtype': float, 'default': 0.},
+            'xStd_rs1':                   {'rtype': float, 'default': 0.},
+            'yStd_rs1':                   {'rtype': float, 'default': 0.},
+            'layerStd_rs1':               {'rtype': float, 'default': 0.},
+            'energy_rs2':                 {'rtype': float, 'default': 0.},
+            'nHits_rs2':                  {'rtype': int,   'default': 0 },
+            'yMean_rs2':                  {'rtype': float, 'default': 0.},
+            'energy_rs3':                 {'rtype': float, 'default': 0.},
+            'yMean_rs3':                  {'rtype': float, 'default': 0.},
+
+            # Electron RoC features
+            'eContEnergy_x1_rs1':         {'rtype': float, 'default': 0.},
+            'eContEnergy_x2_rs1':         {'rtype': float, 'default': 0.},
+            'eContYMean_x1_rs1':          {'rtype': float, 'default': 0.},
+            'eContEnergy_x1_rs2':         {'rtype': float, 'default': 0.},
+            'eContEnergy_x2_rs2':         {'rtype': float, 'default': 0.},
+            'eContNHits_x1_rs2':          {'rtype': int,   'default': 0 },
+            'eContYMean_x1_rs2':          {'rtype': float, 'default': 0.},
+            'eContEnergy_x1_rs3':         {'rtype': float, 'default': 0.},
+
+            # Photon RoC features
+            'gContNHits_x1_rs1':          {'rtype': int,   'default': 0 },
+            'gContYMean_x1_rs1':          {'rtype': float, 'default': 0.},
+            'gContEnergy_x1_rs2':         {'rtype': float, 'default': 0.},
+            'gContEnergy_x2_rs2':         {'rtype': float, 'default': 0.},
+            'gContEnergy_x3_rs2':         {'rtype': float, 'default': 0.},
+            'gContNHits_x1_rs2':          {'rtype': int,   'default': 0 },
+            'gContYMean_x1_rs2':          {'rtype': float, 'default': 0.},
+
+            # Outside RoC features
+            'oContEnergy_x1_rs1':         {'rtype': float, 'default': 0.},
+            'oContEnergy_x2_rs1':         {'rtype': float, 'default': 0.},
+            'oContEnergy_x3_rs1':         {'rtype': float, 'default': 0.},
+            'oContNHits_x1_rs1':          {'rtype': int,   'default': 0 },
+            'oContXMean_x1_rs1':          {'rtype': float, 'default': 0.},
+            'oContYMean_x1_rs1':          {'rtype': float, 'default': 0.},
+            'oContYMean_x2_rs1':          {'rtype': float, 'default': 0.},
+            'oContLayerMean_x1_rs1':      {'rtype': float, 'default': 0.},
+            'oContYStd_x1_rs1':           {'rtype': float, 'default': 0.},
+            'oContYStd_x2_rs1':           {'rtype': float, 'default': 0.},
+            'oContEnergy_x1_rs2':         {'rtype': float, 'default': 0.},
+            'oContEnergy_x2_rs2':         {'rtype': float, 'default': 0.},
+            'oContEnergy_x3_rs2':         {'rtype': float, 'default': 0.},
+            'oContNHits_x2_rs2':          {'rtype': int,   'default': 0 },
+            'oContXMean_x1_rs2':          {'rtype': float, 'default': 0.},
+            'oContYMean_x1_rs2':          {'rtype': float, 'default': 0.},
+            'oContYMean_x2_rs2':          {'rtype': float, 'default': 0.},
+            'oContYMean_x3_rs2':          {'rtype': float, 'default': 0.},
+            'oContLayerMean_x1_rs2':      {'rtype': float, 'default': 0.},
+            'oContYStd_x1_rs2':           {'rtype': float, 'default': 0.},
+            'oContYStd_x2_rs2':           {'rtype': float, 'default': 0.},
+            'oContLayerStd_x1_rs2':       {'rtype': float, 'default': 0.},
+            'oContEnergy_x1_rs3':         {'rtype': float, 'default': 0.},
+            'oContLayerMean_x1_rs3':      {'rtype': float, 'default': 0.},
+    }
+"""
+
