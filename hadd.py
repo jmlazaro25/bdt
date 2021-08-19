@@ -5,20 +5,28 @@ def main():
 
     # Arguments
     parser = ArgumentParser()
-    parser.add_argument('stage', action='store', default=None,
-            help="'train' for training trees or 'eval' for plotting trees")
-    parser.add_argument('--bdt', action='store', default=None,
-            help="If stage is eval, specify bdt (without the '_bdt')")
+    parser.add_argument(
+            'stage',
+            default=None,
+            help="'train' for training trees or 'eval' for plotting trees"
+            )
+    parser.add_argument(
+            '--bdt',
+            default=None,
+            help="If stage is eval, specify bdt (without the '_bdt')"
+            )
+    parser.add_argument(
+            '-p',
+            dest='procs'
+            help=('[1:] are assumed to be signal and are hadded together for training')
+            default = ['pn', '0.001', '0.01', '0.1', '1.0']
     args = parser.parse_args()
 
     ldmx_cmd = 'singularity run --home $PWD/.. $PWD/../ldmx_dev_latest.sif .. '
 
-    # [1:] are assumed to be signal and are hadded together for training
-    procs = ('pn', '0.001', '0.01', '0.1', '1.0')
-
     if args.stage == 'eval':
 
-        for proc in procs:
+        for proc in args.procs:
                     
             system(
                     ldmx_cmd + 'hadd ' \
