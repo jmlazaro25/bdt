@@ -86,7 +86,7 @@ def rsegcont(f_dict, args, e_store, lq):
 
         # Choose rsegment
         layer = int( ecalRecHit[3] )
-        if layer < e_store['avgLayerHit']: 
+        if layer < e_store['avgLayerHit']:
             rseg_i = 0
         elif layer < e_store['avgLayerHit'] + f_dict['stdLayerHit']:
             rseg_i = 1

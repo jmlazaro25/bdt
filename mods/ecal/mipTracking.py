@@ -71,7 +71,7 @@ def straightTracks(hitlist, etraj_ends, ptraj_ends, mst=2):
         if len(track) < mst: continue
 
         # If it's exactly the min, it has to be very close to ptraj
-        if len(track) == mst: 
+        if len(track) == mst:
             for hitt in track:
                 if physics.distPtToLine( physics.pos(hitt),
                         ptraj_ends[0], ptraj_ends[1] ) > 8:
@@ -179,7 +179,7 @@ def nStraightTracks_c(trackingHitList, e_traj_ends, g_traj_ends):
 
         # Confirm if track is valid
         if trackLen >= 2: # Set min track length
-            
+
             # Make sure the track is near the photon trajectory and away from
             # the electron
             closest_e = physics.distTwoLines(
@@ -200,7 +200,7 @@ def nStraightTracks_c(trackingHitList, e_traj_ends, g_traj_ends):
 
             # If valid track is found, remove hits in track from hitList
             for kHit in range(trackLen):
-                trackingHitList.pop( track[kHit] - kHit) 
+                trackingHitList.pop( track[kHit] - kHit)
 
             # nStraightTracks++
             nTracks += 1
@@ -257,11 +257,11 @@ def mipTracking_init(f_dict, args, e_store, lq):
         # Electron trajectory is missing so all hits in Ecal are okay to use
         # Pick trajectories so they won't restrict tracking, far outside Ecal
 
-        e_store['e_traj_ends'] = [ 
+        e_store['e_traj_ends'] = [
                                     np.array([999 ,999 ,0]),
                                     np.array([999 ,999 ,999 ])
                                     ]
-        e_store['g_traj_ends'] = [ 
+        e_store['g_traj_ends'] = [
                                     np.array([1000,1000,0]),
                                     np.array([1000,1000,1000])
                                     ]
@@ -280,7 +280,7 @@ def epSepAndDot(f_dict, args, e_store, lq):
     """
 
     if e_store['e_traj_ends'][0][0] == 999:
-        
+
         f_dict['epSep'] = 10.0 + 1.0 # Don't cut on these in this case
         f_dict['epDot'] = 3.0 + 1.0
 
@@ -307,7 +307,7 @@ def mipTracking_collect(f_dict, args, e_store, ecalRecHit):
     """
 
     if ecalRecHit.getEnergy() <= 0: return
-    
+
     # Reused
     layer = emain.layer(ecalRecHit)
     xy_pair = ( ecalRecHit.getXPos(), ecalRecHit.getYPos() )

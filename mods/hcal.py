@@ -128,7 +128,7 @@ def collect(f_dict, args, h_store, hcalRecHit):
 def backv1_all(f_dict, args, h_store, lq):
 
     """ Calculate collective part of 'first' set of hcal features  """
-    
+
     # Don't try if there are no hits
     if type(h_store['back_hits'][0]) != np.ndarray: return
 
@@ -147,17 +147,17 @@ def backv1_all(f_dict, args, h_store, lq):
                             weights = h_store['back_hits'][1:,0]
                             )
     h_store['back_avg_e_z'] = np.average(
-                            h_store['back_hits'][1:,3], 
+                            h_store['back_hits'][1:,3],
                             weights = h_store['back_hits'][1:,0]
                             )
     f_dict['back_avgPE'] = np.mean( h_store['back_hits'][1:,4] )
     f_dict['back_std_e_x'] = math.sqrt(
-            np.average( 
+            np.average(
                 (h_store['back_hits'][1:,1] - h_store['back_avg_e_x'])**2 ,
                 weights = h_store['back_hits'][1:,0]
                 )
             )
-    f_dict['back_std_e_y'] = math.sqrt( 
+    f_dict['back_std_e_y'] = math.sqrt(
             np.average(
                 (h_store['back_hits'][1:,2] - h_store['back_avg_e_y'])**2 ,
                 weights = h_store['back_hits'][1:,0]
@@ -166,7 +166,7 @@ def backv1_all(f_dict, args, h_store, lq):
     f_dict['back_std_e_z'] = math.sqrt(
             np.average(
                 (h_store['back_hits'][1:,3] - h_store['back_avg_e_z'])**2 ,
-                weights = h_store['back_hits'][1:,0] 
+                weights = h_store['back_hits'][1:,0]
                 )
             )
     f_dict['back_dz_e'] = max( h_store['back_hits'][1:,3] )\
@@ -181,7 +181,7 @@ def backv1_seg(f_dict, args, h_store, lq):
 
     # Regional Stats
     hits_e_1 = hits_e_2 = hits_e_3 = np.zeros(5)
-    
+
     # Group hits into regions
     for hcalRecHit in h_store['back_hits'][1:]:
         if hcalRecHit[3] < h_store['back_avg_e_z']:
@@ -209,10 +209,10 @@ def backv1_seg(f_dict, args, h_store, lq):
                 f_dict[f'back_std_{s}e_e'] = math.sqrt(
                         sum((regions[s][1:,0] - f_dict[f'back_avg_{s}e_e'])**2)/\
                             f_dict[f'back_nHits_{s}e'] )
-                f_dict[f'back_std_{s}e_x'] = math.sqrt( np.average( 
+                f_dict[f'back_std_{s}e_x'] = math.sqrt( np.average(
                     (regions[s][1:,1] - avg_e_x)**2,
                     weights = regions[s][1:,0] ) )
-                f_dict[f'back_std_{s}e_y'] = math.sqrt( np.average( 
+                f_dict[f'back_std_{s}e_y'] = math.sqrt( np.average(
                     (regions[s][1:,2] - avg_e_y)**2,
                     weights = regions[s][1:,0] ) )
                 f_dict[f'back_std_{s}e_pe'] = math.sqrt(

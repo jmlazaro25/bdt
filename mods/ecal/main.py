@@ -68,7 +68,7 @@ layerWeights = [
 def recE(siEnergy, layer):
 
     """ Reconstructed energy from sim energy """
-    
+
     return ( (siEnergy/mipSiEnergy) * layerWeights[layer-1] + siEnergy)*\
             secondOrderEnergyCorrection
 
@@ -79,7 +79,7 @@ def recE(siEnergy, layer):
 def layer(hit):
 
     """ Get layerID from ecal hit """
-    
+
     return (hit.getID() >> LAYER_SHIFT) & LAYER_MASK
 
 def module(hit):
@@ -107,7 +107,7 @@ def layerZofHit(hit):
 def layerIntercepts(pos,mom,layerZs=ecal_layerZs):
 
     """ Tuple of projected (x,y)s at each ECal layer """
-    
+
     return tuple( [ physics.projection(pos,mom,z) for z in layerZs ] )
 
 ##################################################
@@ -130,7 +130,7 @@ def base_ecal(f_dict, args, e_store, lq):
     f_dict['yStd']            = ecalVeto.getYStd()
     f_dict['avgLayerHit']     = ecalVeto.getAvgLayerHit()
     f_dict['stdLayerHit']     = ecalVeto.getStdLayerHit()
-    f_dict['deepestLayerHit'] = ecalVeto.getDeepestLayerHit() 
+    f_dict['deepestLayerHit'] = ecalVeto.getDeepestLayerHit()
     f_dict['ecalBackEnergy']  = ecalVeto.getEcalBackEnergy()
 
 def base_rsegcont(f_dict, args, e_store, lq):

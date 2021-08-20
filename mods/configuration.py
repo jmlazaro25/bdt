@@ -14,7 +14,7 @@ def tree_building_info(configFile):
 
     config = ConfigParser()
     config.read(configFile)
-    
+
     tracker = config.get('trees', 'tracker')
     ecal    = config.get('trees', 'ecal')
     hcal    = config.get('trees', 'hcal')
@@ -46,7 +46,7 @@ def feature_info(configFile):
 
     config = ConfigParser()
     config.read(configFile)
-    
+
     tracker = config.get('setup', 'tracker')
     ecal    = config.get('setup', 'ecal')
     hcal    = config.get('setup', 'hcal')
@@ -87,11 +87,11 @@ def parse_bdt_config(action_str, configFile, clargs = {}):
 
     # Action dependent items
     if action_str == 'trees':
-        
+
         train_or_test = config.get('trees', 'train_or_test')
         if train_or_test != '':
             print('\nOnly running over {}ing set!!!'.format(train_or_test))
-        sets = {'test', 'train'} if train_or_test == '' else {train_or_test} 
+        sets = {'test', 'train'} if train_or_test == '' else {train_or_test}
 
         for proc in procs:
             for st in sets:
@@ -109,7 +109,7 @@ def parse_bdt_config(action_str, configFile, clargs = {}):
                         batch = clargs['batch'],
                         ebeam = int( config.get('setup', 'ebeam') )
                         )
-                
+
                 tConf = TreeConfig(
                         outfile = '{}_{}.root'.format(proc, st),
                         tree_name = tree_nem,
@@ -125,13 +125,13 @@ def parse_bdt_config(action_str, configFile, clargs = {}):
         # Only print branches_info once
         #proc_configs[0].tConfig.print_branches()
 
-        return proc_configs            
+        return proc_configs
 
     # Won't need this anymore
     del calc_funcs
 
     if action_str == 'train':
-        
+
         # Overwrite branches info
         branches_info = feature_info(configFile)[0]
 
@@ -184,7 +184,7 @@ def parse_bdt_config(action_str, configFile, clargs = {}):
         # Only print branches_info once
         #proc_configs[0].tConfig.print_branches()
 
-        return proc_configs 
+        return proc_configs
 
 def parse_batch_config(clargs):
 
@@ -249,7 +249,7 @@ def parse_batch_config(clargs):
                 outfile = '{}_eval.root'.format(fname),
                 tree_name = name + '_Veto',
                 branches_info = branches_info,
-                outdir = clargs['outlist'][0] 
+                outdir = clargs['outlist'][0]
                 )
 
         return BdtConfig(pConf, tConf, printbrs=True )
@@ -316,13 +316,13 @@ class ProcessConfig:
     def print(self):
 
         """ Print parameters neatly """
-       
+
         print_dict(self.__dict__, '\n{} configuration:'.format(self.iD))
 
 class TreeConfig:
 
     """ A container for TreeMaker confugrations """
-    
+
     def __init__(
             self,
             outfile = 'outfile.root',
@@ -462,7 +462,7 @@ def parse():
     return pdict
 
 def print_dict(d, prefix='', skip=set()):
-    
+
     """ Print dictionary neatly (esp. useful for configurations) """
 
     if prefix != '':
