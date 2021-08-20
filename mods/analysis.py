@@ -1,7 +1,7 @@
 import numpy as np
 from mods import physics
 from mods.ecal import main as emain
-cellMap = np.loadtxt('./mods/ecal/cellmodule.txt') # Add bdt/ for running batch
+cellMap = np.loadtxt('./mods/ecal/cellmodule.txt')
 
 def fidcats(f_dict, args, e_store, lq):
 

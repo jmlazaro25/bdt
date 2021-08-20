@@ -30,10 +30,10 @@ class TreeProcess:
         self.endfs = endfs
         self.funcs = funcs
         self.strEvent = strEvent
-        self.maxEvents = maxEvents
+        self.maxEvents = pConfig.maxEvents # Really no good way of doing this
         self.pfreq = pfreq
         self.color = color
-        self.batch =pConfig.batch
+        self.batch = pConfig.batch
         self.infiles = pConfig.infiles
         self.tree = pConfig.tree; self.tree_name = pConfig.tree_name
         self.iD = pConfig.iD
