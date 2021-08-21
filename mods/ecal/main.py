@@ -152,6 +152,15 @@ def base_rsegcont(f_dict, args, e_store, lq):
     # Only for seperating hits into relative segments
     e_store['avgLayerHit']    = ecalVeto.getAvgLayerHit()
 
+    # Set layerMeans to 0 to have avilable for main += loops
+    from mods.ecal.segcont import nSegments
+    for s in range(nSegments):
+        e_store[f'layerMean_rs{s + 1}'] = 0
+        for r in range(contRegions):
+                e_store[f'eContLayerMean_x{r + 1}_rs{s + 1}'] = 0
+                e_store[f'gContLayerMean_x{r + 1}_rs{s + 1}'] = 0
+                e_store[f'oContLayerMean_x{r + 1}_rs{s + 1}'] = 0
+
 def gabrielle_containment(f_dict, args, e_store, lq):
 
     """ Energy and number containment quantities from input for gabrielle """

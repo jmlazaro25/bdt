@@ -371,21 +371,43 @@ rsegcont_funcs = {
                 'priority': 20.1,
                 'brs': ()
                 },
-            segcont.prep_ecal_lfs: {
-                'priority': 20.2,
-                'brs': ()
-                },
-            segcont.collect: {
+            segcont.rsegcont_means: {
                 'priority': 21,
                 'brs': (
                     ('EcalRecHits_'+pp, 'EcalHit'),
-                    )
+                    ),
                 },
-            segcont.rsegcont: {
+            segcont.rsegcont_means_norm: {
                 'priority': 22,
+                'brs': ()
+                },
+            segcont.rsegcont_stds: {
+                'priority': 23,
+                'brs': (
+                    ('EcalRecHits_'+pp, 'EcalHit'),
+                    ),
+                },
+            segcont.rsegcont_stds_norm: {
+                'priority': 24,
                 'brs': ()
                 }
         }
+"""
+segcont.prep_ecal_lfs: {
+    'priority': 20.2,
+    'brs': ()
+    },
+segcont.collect: {
+    'priority': 21,
+    'brs': (
+        ('EcalRecHits_'+pp, 'EcalHit'),
+        )
+    },
+segcont.rsegcont: {
+    'priority': 22,
+    'brs': ()
+    }
+"""
 
 trees_info_rsegcont = {
         'nReadoutHits':    {'rtype': int,   'default': 0 },

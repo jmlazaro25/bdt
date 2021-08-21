@@ -41,6 +41,10 @@ def segcont_init(f_dict, args, e_store, lq):
 
     e_store['g_radii'] = emain.radius68_thetalt6_plt1000
 
+''' Massive irony...
+or maybe not... (hard to tell speed of this vs method below without more tests
+for which there is no time. This way at least it can't be any slower than 2X
+dor doing segcont and rsegcont... right? (memory maketh :') )
 def prep_ecal_lfs(f_dict, args, e_store, lq):
 
     """ Just add back_hits to store (othewise it'll keep being overwritten) """
@@ -283,6 +287,227 @@ def rsegcont(f_dict, args, e_store, lq):
     # Don't carry around hitinfo after this
     del e_store['ecal_hits']
     del rsegs
+''' #Massive irony
+
+def rsegcont_means(f_dict, args, e_store, ecalRecHit):
+
+    """ Segment-containment calculations for first loop over EcalRecHits """
+
+    if ecalRecHit.getEnergy() <= 0: return
+
+    # Reused often
+    energy = ecalRecHit.getEnergy()
+    layer = emain.layer(ecalRecHit)
+    xy_pair = ( ecalRecHit.getXPos(), ecalRecHit.getYPos() )
+
+    # Distance to electron trajectory
+    if e_store['e_traj'] != None:
+        xy_e_traj = (e_store['e_traj'][layer][0], e_store['e_traj'][layer][1])
+        distance_e_traj = physics.dist(xy_pair, xy_e_traj)
+    else: distance_e_traj = -1.0
+
+    # Distance to photon trajectory
+    if e_store['g_traj'] != None:
+        xy_g_traj = (e_store['g_traj'][layer][0], e_store['g_traj'][layer][1])
+        distance_g_traj = physics.dist(xy_pair, xy_g_traj)
+    else: distance_g_traj = -1.0
+
+    # Decide which longitudinal segment the hit is in and add to sums
+    for s in range(1, nSegments + 1):
+
+        if not ( segLayers[s - 1] <= layer and (layer <= segLayers[s] - 1) ):
+            continue
+
+        f_dict[f'energy_rs{s}'] += energy
+        f_dict[f'nHits_rs{s}'] += 1
+        f_dict[f'xMean_rs{s}'] += xy_pair[0]*energy
+        f_dict[f'yMean_rs{s}'] += xy_pair[1]*energy
+        e_store[f'layerMean_rs{s}'] += layer*energy
+
+        # Decide which containment region the hit is in and add to sums
+        for r in range(1, emain.contRegions + 1):
+
+            if (r - 1)*e_store['e_radii'][layer] <= distance_e_traj \
+                    and distance_e_traj < r*e_store['e_radii'][layer]:
+                f_dict[f'eContEnergy_x{r}_rs{s}'] += energy
+                f_dict[f'eContNHits_x{r}_rs{s}'] += 1
+                f_dict[f'eContXMean_x{r}_rs{s}'] += xy_pair[0]*energy
+                f_dict[f'eContYMean_x{r}_rs{s}'] += xy_pair[1]*energy
+                e_store[f'eContLayerMean_x{r}_rs{s}'] += layer*energy
+
+            if (r - 1)*e_store['g_radii'][layer] <= distance_g_traj \
+                    and distance_g_traj < r*e_store['g_radii'][layer]:
+                f_dict[f'gContEnergy_x{r}_rs{s}'] += energy
+                f_dict[f'gContNHits_x{r}_rs{s}'] += 1
+                f_dict[f'gContXMean_x{r}_rs{s}'] += xy_pair[0]*energy
+                f_dict[f'gContYMean_x{r}_rs{s}'] += xy_pair[1]*energy
+                e_store[f'gContLayerMean_x{r}_rs{s}'] += layer*energy
+
+            if distance_e_traj > r*e_store['e_radii'][layer] \
+                    and distance_g_traj > r*e_store['g_radii'][layer]:
+                f_dict[f'oContEnergy_x{r}_rs{s}'] += energy
+                f_dict[f'oContNHits_x{r}_rs{s}'] += 1
+                f_dict[f'oContXMean_x{r}_rs{s}'] += xy_pair[0]*energy
+                f_dict[f'oContYMean_x{r}_rs{s}'] += xy_pair[1]*energy
+                e_store[f'oContLayerMean_x{r}_rs{s}'] += layer*energy
+
+def rsegcont_means_norm(f_dict, args, e_store, lq):
+
+    """ Normalize mean calculations started in segcont_means """
+
+    for s in range(1, nSegments + 1):
+
+        if f_dict[f'energy_rs{s}'] > 0:
+            f_dict[f'xMean_rs{s}'] /= f_dict[f'energy_rs{s}']
+            f_dict[f'yMean_rs{s}'] /= f_dict[f'energy_rs{s}']
+            e_store[f'layerMean_rs{s}'] /= f_dict[f'energy_rs{s}']
+
+        for r in range(1, emain.contRegions + 1):
+
+            if f_dict[f'eContEnergy_x{r}_rs{s}'] > 0:
+                f_dict[f'eContXMean_x{r}_rs{s}'] \
+                        /= f_dict[f'eContEnergy_x{r}_rs{s}']
+                f_dict[f'eContYMean_x{r}_rs{s}'] \
+                        /= f_dict[f'eContEnergy_x{r}_rs{s}']
+                e_store[f'eContLayerMean_x{r}_rs{s}'] \
+                        /= f_dict[f'eContEnergy_x{r}_rs{s}']
+
+            if f_dict[f'gContEnergy_x{r}_rs{s}'] > 0:
+                f_dict[f'gContXMean_x{r}_rs{s}'] \
+                        /= f_dict[f'gContEnergy_x{r}_rs{s}']
+                f_dict[f'gContYMean_x{r}_rs{s}'] \
+                        /= f_dict[f'gContEnergy_x{r}_rs{s}']
+                e_store[f'gContLayerMean_x{r}_rs{s}'] \
+                        /= f_dict[f'gContEnergy_x{r}_rs{s}']
+
+            if f_dict[f'oContEnergy_x{r}_rs{s}'] > 0:
+                f_dict[f'oContXMean_x{r}_rs{s}'] \
+                        /= f_dict[f'oContEnergy_x{r}_rs{s}']
+                f_dict[f'oContYMean_x{r}_rs{s}'] \
+                        /= f_dict[f'oContEnergy_x{r}_rs{s}']
+                e_store[f'oContLayerMean_x{r}_rs{s}'] \
+                        /= f_dict[f'oContEnergy_x{r}_rs{s}']
+
+def rsegcont_stds(f_dict, args, e_store, ecalRecHit):
+
+    """ Segment-containment calculations for second loop over EcalRecHits """
+
+    if ecalRecHit.getEnergy() <= 0: return
+
+    # Reused often
+    energy = ecalRecHit.getEnergy()
+    layer = emain.layer(ecalRecHit)
+    xy_pair = ( ecalRecHit.getXPos(), ecalRecHit.getYPos() )
+
+    # Distance to electron trajectory
+    if e_store['e_traj'] != None:
+        xy_e_traj = (e_store['e_traj'][layer][0], e_store['e_traj'][layer][1])
+        distance_e_traj = physics.dist(xy_pair, xy_e_traj)
+    else: distance_e_traj = -1.0
+
+    # Distance to photon trajectory
+    if e_store['g_traj'] != None:
+        xy_g_traj = (e_store['g_traj'][layer][0], e_store['g_traj'][layer][1])
+        distance_g_traj = physics.dist(xy_pair, xy_g_traj)
+    else: distance_g_traj = -1.0
+
+    # Decide which longitudinal segment the hit is in and add to sums
+    for s in range(1, nSegments + 1):
+
+        if not ( segLayers[s - 1] <= layer and (layer <= segLayers[s] - 1) ):
+            continue
+
+        f_dict[f'xStd_rs{s}'] += ( (xy_pair[0] \
+                - f_dict[f'xMean_rs{s}'])**2 )*energy
+        f_dict[f'yStd_rs{s}'] += ( (xy_pair[1] \
+                - f_dict[f'yMean_rs{s}'])**2 )*energy
+        f_dict[f'layerStd_rs{s}'] += ( (layer \
+                - e_store[f'layerMean_rs{s}'])**2 )*energy
+
+        # Decide which containment region the hit is in and add to sums
+        for r in range(1, emain.contRegions + 1):
+
+            if (r - 1)*e_store['e_radii'][layer] <= distance_e_traj \
+              and distance_e_traj < r*e_store['e_radii'][layer]:
+                f_dict[f'eContXStd_x{r}_rs{s}'] += ((xy_pair[0] \
+                        - f_dict[f'eContXMean_x{r}_rs{s}'])**2)*energy
+                f_dict[f'eContYStd_x{r}_rs{s}'] += ((xy_pair[1] \
+                        - f_dict[f'eContYMean_x{r}_rs{s}'])**2)*energy
+                f_dict[f'eContLayerStd_x{r}_rs{s}'] += ((layer \
+                        - e_store[f'eContLayerMean_x{r}_rs{s}'])**2)\
+                        *energy
+
+            if (r - 1)*e_store['g_radii'][layer] <= distance_g_traj \
+              and distance_g_traj < r*e_store['g_radii'][layer]:
+                f_dict[f'gContXStd_x{r}_rs{s}'] += ((xy_pair[0] \
+                        - f_dict[f'gContXMean_x{r}_rs{s}'])**2)*energy
+                f_dict[f'gContYStd_x{r}_rs{s}'] += ((xy_pair[1] \
+                        - f_dict[f'gContYMean_x{r}_rs{s}'])**2)*energy
+                f_dict[f'gContLayerStd_x{r}_rs{s}'] += ((layer \
+                        - e_store[f'gContLayerMean_x{r}_rs{s}'])**2)\
+                        *energy
+
+            if distance_e_traj > r*e_store['e_radii'][layer] \
+              and distance_g_traj > r*e_store['g_radii'][layer]:
+                f_dict[f'oContXStd_x{r}_rs{s}'] += ((xy_pair[0] \
+                        - f_dict[f'oContXMean_x{r}_rs{s}'])**2)*energy
+                f_dict[f'oContYStd_x{r}_rs{s}'] += ((xy_pair[1] \
+                        - f_dict[f'oContYMean_x{r}_rs{s}'])**2)*energy
+                f_dict[f'oContLayerStd_x{r}_rs{s}'] += ((layer \
+                        - e_store[f'oContLayerMean_x{r}_rs{s}'])**2)\
+                        *energy
+
+def rsegcont_stds_norm(f_dict, args, e_store, lq):
+
+    """ Normalize standard deviation calculations started in seccont_stds """
+
+    for s in range(1, nSegments + 1):
+
+        if f_dict[f'energy_rs{s}'] > 0:
+            f_dict[f'xStd_rs{s}'] = math.sqrt(
+                    f_dict[f'xStd_rs{s}'] \
+                    / f_dict[f'energy_rs{s}']    )
+            f_dict[f'yStd_rs{s}'] = math.sqrt(
+                    f_dict[f'yStd_rs{s}'] \
+                    / f_dict[f'energy_rs{s}']    )
+            f_dict[f'layerStd_rs{s}'] = math.sqrt(
+                    f_dict[f'layerStd_rs{s}'] \
+                    / f_dict[f'energy_rs{s}']    )
+
+        for r in range(1, emain.contRegions + 1):
+
+            if f_dict[f'eContEnergy_x{r}_rs{s}'] > 0:
+                f_dict[f'eContXStd_x{r}_rs{s}'] \
+                        = math.sqrt(f_dict[f'eContXStd_x{r}_rs{s}'] \
+                        / f_dict[f'eContEnergy_x{r}_rs{s}'] )
+                f_dict[f'eContYStd_x{r}_rs{s}'] \
+                        = math.sqrt(f_dict[f'eContYStd_x{r}_rs{s}'] \
+                        / f_dict[f'eContEnergy_x{r}_rs{s}'] )
+                f_dict[f'eContLayerStd_x{r}_rs{s}'] \
+                        = math.sqrt(f_dict[f'eContLayerStd_x{r}_rs{s}']\
+                                / f_dict[f'eContEnergy_x{r}_rs{s}'] )
+
+            if f_dict[f'gContEnergy_x{r}_rs{s}'] > 0:
+                f_dict[f'gContXStd_x{r}_rs{s}'] \
+                        = math.sqrt(f_dict[f'gContXStd_x{r}_rs{s}'] \
+                        / f_dict[f'gContEnergy_x{r}_rs{s}'] )
+                f_dict[f'gContYStd_x{r}_rs{s}'] \
+                        = math.sqrt(f_dict[f'gContYStd_x{r}_rs{s}'] \
+                        / f_dict[f'gContEnergy_x{r}_rs{s}'] )
+                f_dict[f'gContLayerStd_x{r}_rs{s}'] \
+                        = math.sqrt(f_dict[f'gContLayerStd_x{r}_rs{s}']\
+                                / f_dict[f'gContEnergy_x{r}_rs{s}'] )
+
+            if f_dict[f'oContEnergy_x{r}_rs{s}'] > 0:
+                f_dict[f'oContXStd_x{r}_rs{s}'] \
+                        = math.sqrt(f_dict[f'oContXStd_x{r}_rs{s}'] \
+                        / f_dict[f'oContEnergy_x{r}_rs{s}'] )
+                f_dict[f'oContYStd_x{r}_rs{s}'] \
+                        = math.sqrt(f_dict[f'oContYStd_x{r}_rs{s}'] \
+                        / f_dict[f'oContEnergy_x{r}_rs{s}'] )
+                f_dict[f'oContLayerStd_x{r}_rs{s}'] \
+                        = math.sqrt(f_dict[f'oContLayerStd_x{r}_rs{s}']\
+                               / f_dict[f'oContEnergy_x{r}_rs{s}'] )
 
 def segcont_means(f_dict, args, e_store, ecalRecHit):
 
@@ -505,4 +730,4 @@ def segcont_stds_norm(f_dict, args, e_store, lq):
                 f_dict['oContLayerStd_x{}_s{}'.format(r,s)] \
                         = math.sqrt(f_dict['oContLayerStd_x{}_s{}'\
                                                                 .format(r,s)] \
-                                / f_dict['oContEnergy_x{}_s{}'.format(r,s)] )
+                               / f_dict['oContEnergy_x{}_s{}'.format(r,s)] )
