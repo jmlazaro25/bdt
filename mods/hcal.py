@@ -125,7 +125,7 @@ def collect(f_dict, args, h_store, hcalRecHit):
 
     h_store['back_hits'] = np.vstack( (h_store['back_hits'], hcalRecHit) )
 
-def backv1_all(f_dict, args, h_store, lq):
+def backv1all(f_dict, args, h_store, lq):
 
     """ Calculate collective part of 'first' set of hcal features  """
 
@@ -172,12 +172,25 @@ def backv1_all(f_dict, args, h_store, lq):
     f_dict['back_dz_e'] = max( h_store['back_hits'][1:,3] )\
                             - h_store['back_avg_e_z']
 
-def backv1_seg(f_dict, args, h_store, lq):
+def backv1seg(f_dict, args, h_store, lq):
 
     """ Calculate regional parts of 'first' set of hcal features """
 
     # Don't try if there are no hits
     if type(h_store['back_hits'][0]) != np.ndarray: return
+
+    # In case not running backv1all and don't have z avg and std
+    if 'back_avg_e_z' not in h_store:
+        h_store['back_avg_e_z'] = np.average(
+                                h_store['back_hits'][1:,3],
+                                weights = h_store['back_hits'][1:,0]
+                                )
+        h_store['back_std_e_z'] = math.sqrt(
+                np.average(
+                    (h_store['back_hits'][1:,3] - h_store['back_avg_e_z'])**2 ,
+                    weights = h_store['back_hits'][1:,0]
+                    )
+                )
 
     # Regional Stats
     hits_e_1 = hits_e_2 = hits_e_3 = np.zeros(5)
@@ -186,8 +199,13 @@ def backv1_seg(f_dict, args, h_store, lq):
     for hcalRecHit in h_store['back_hits'][1:]:
         if hcalRecHit[3] < h_store['back_avg_e_z']:
             hits_e_1 = np.vstack( (hits_e_1, hcalRecHit) )
-        elif hcalRecHit[3] < h_store['back_avg_e_z'] + f_dict['back_std_e_z']:
-            hits_e_2 = np.vstack( (hits_e_2, hcalRecHit) )
+        elif 'back_std_e_z' in f_dict:
+            if hcalRecHit[3] \
+                    < h_store['back_avg_e_z'] + f_dict['back_std_e_z']:
+                hits_e_2 = np.vstack( (hits_e_2, hcalRecHit) )
+            elif hcalRecHit[3] \
+                    < h_store['back_avg_e_z'] + h_store['back_std_e_z']:
+                hits_e_2 = np.vstack( (hits_e_2, hcalRecHit) )
         else:
             hits_e_3 = np.vstack( (hits_e_3, hcalRecHit) )
 
