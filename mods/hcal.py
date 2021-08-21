@@ -199,11 +199,10 @@ def backv1seg(f_dict, args, h_store, lq):
     for hcalRecHit in h_store['back_hits'][1:]:
         if hcalRecHit[3] < h_store['back_avg_e_z']:
             hits_e_1 = np.vstack( (hits_e_1, hcalRecHit) )
-        elif 'back_std_e_z' in f_dict:
-            if hcalRecHit[3] \
+        elif 'back_std_e_z' in f_dict and hcalRecHit[3] \
                     < h_store['back_avg_e_z'] + f_dict['back_std_e_z']:
                 hits_e_2 = np.vstack( (hits_e_2, hcalRecHit) )
-            elif hcalRecHit[3] \
+        elif 'back_std_e_z' in h_store and hcalRecHit[3] \
                     < h_store['back_avg_e_z'] + h_store['back_std_e_z']:
                 hits_e_2 = np.vstack( (hits_e_2, hcalRecHit) )
         else:
