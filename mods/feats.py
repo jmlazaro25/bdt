@@ -172,20 +172,20 @@ trees_info_maxPE = {
 
 # All of back section
 backv1all_funcs = {
-                        hcal.prep_hcal_lfs: {
-                            'priority': 30,
-                            'brs': ()
-                            },
-                        hcal.collect: {
-                            'priority': 31,
-                            'brs': (
-                                ('HcalRecHits_'+pp, 'HcalHit'),
-                                )
-                            },
-                        hcal.backv1all: {
-                            'priority': 32,
-                            'brs': ()
-                            }
+                    hcal.prep_hcal_lfs: {
+                        'priority': 30,
+                        'brs': ()
+                        },
+                    hcal.collect: {
+                        'priority': 31,
+                        'brs': (
+                            ('HcalRecHits_'+pp, 'HcalHit'),
+                            )
+                        },
+                    hcal.backv1all: {
+                        'priority': 32,
+                        'brs': ()
+                        }
                     }
 
 trees_info_backv1all = {
@@ -236,13 +236,11 @@ for s in range(1, hcal.back_segments + 1):
     trees_info_backv1seg[f'back_std_{s}e_pe'] = {'rtype': float, 'default': 0.}
 
 backv1_funcs = {
-            **maxPE_funcs,
             **backv1all_funcs,
             **backv1seg_funcs
         }
 
 trees_info_backv1 = {
-                    **trees_info_maxPE,
                     **trees_info_backv1all,
                     **trees_info_backv1seg
                     }
