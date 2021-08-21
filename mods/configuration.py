@@ -58,9 +58,11 @@ def feature_info(configFile):
     # Build feature dictionary
     f_branches = {}
     for d_name in d_names:
-        if 'feats_{}'.format(d_name) in feats.__dict__:
-            f_branches.update( getattr(feats, 'feats_{}'.format(d_name)) )
-        else: sys.exit('\nInvalid feature dictionary: {}'.format(d_name))
+
+        for dn in d_name.split('AND'):
+            if 'feats_{}'.format(dn) in feats.__dict__:
+                f_branches.update( getattr(feats, 'feats_{}'.format(dn)) )
+            else: sys.exit('\nInvalid feature dictionary: {}'.format(dn))
 
     return f_branches, '_'.join(d_names)
 
