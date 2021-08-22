@@ -258,14 +258,12 @@ class BdtTrainer():
                 "eta": self.eta,
                 "max_depth": self.tree_depth,
                 "min_child_weight": 20,
-                "silent": 1,
                 "subsample": .9,
                 "colsample_bytree": .85,
                 "eval_metric": 'error',
                 "seed": 1,
                 "nthread": 1,
-                "verbosity": 1,
-                "early_stopping_rounds" : 10
+                "verbosity": 1
                 }
 
     def run(self, strEvent=None, maxEvents=1.25e6 , pfreq=None):
@@ -351,7 +349,8 @@ class BdtTrainer():
                 self.params_dict,
                 training_matrix,
                 int(self.tree_number),
-                evallist
+                evallist,
+                early_stopping_rounds = 10
                 )
 
         # Store BDT
