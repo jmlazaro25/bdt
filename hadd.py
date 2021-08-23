@@ -17,12 +17,14 @@ def main():
             )
     parser.add_argument(
             '-p',
-            dest='procs'
-            help=('[1:] are assumed to be signal and are hadded together for training')
+            dest='procs',
+            nargs='+',
+            help=('[1:] are assumed to be signal and are hadded together for training'),
             default = ['pn', '0.001', '0.01', '0.1', '1.0']
+            )
     args = parser.parse_args()
 
-    ldmx_cmd = 'singularity run --home $PWD/.. $PWD/../ldmx_dev_latest.sif .. '
+    ldmx_cmd = 'singularity run --home $PWD $PWD/../ldmx_dev_latest.sif . '
 
     if args.stage == 'eval':
 
@@ -30,8 +32,8 @@ def main():
                     
             system(
                     ldmx_cmd + 'hadd ' \
-                    + 'bdt/{bdt}_bdt/evals/{p}_eval.root  \
-                       bdt/{bdt}_bdt/evals/{p}/*'.format(bdt=args.bdt, p=proc)
+                    + '{bdt}_bdt/evals/{p}_eval.root  \
+                       {bdt}_bdt/evals/{p}/*'.format(bdt=args.bdt, p=proc)
                     )
 
     # Untested
