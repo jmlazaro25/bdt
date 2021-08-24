@@ -36,7 +36,7 @@ def main():
                        {bdt}_bdt/evals/{p}/*'.format(bdt=args.bdt, p=proc)
                     )
 
-    # Untested
+    # Untested - mainframe gives template
     elif args.stage == 'train':
 
         from glob import glob

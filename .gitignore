@@ -4,6 +4,10 @@ triggerStuff/*.png
 triggerStuff/*.root
 triggerStuff/*/
 confs/local_*
+confs/nocommit
 *_bdt/
 mods/__pycache__/
 mods/ecal/__pycache__/
+*.pcm
+*.so
+*.d
