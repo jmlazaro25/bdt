@@ -111,7 +111,7 @@ void SetupColors(){
 }
 
 // Macro to plot variables stored in flat trees
-void plot_bdt_recoilPt_0(
+void plot_bdt_Apdz_0(
     const TString &bdtName1,
     const TString &bdtName2,
     const TString &flatDir1,
@@ -143,8 +143,64 @@ void plot_bdt_recoilPt_0(
     proclabel[bdtName2] = bdtName2 + " #varepsilon(bkg) = " + effstr;
 
     // Variable bin widths
-    int n_bins = 14;
-    int xbins[15] = {0, 2, 4, 6, 8, 10, 15, 20, 25, 30, 35, 40, 45, 50, 100};
+    int n_bins = 55;
+    int xbins[56] = {480,
+                     500,
+                     550,
+                     600,
+                     650,
+                     700,
+                     750,
+                     800,
+                     850,
+                     900,
+                     950,
+                     1000,   
+                     1050,
+                     1100,
+                     1150,
+                     1200,
+                     1250,
+                     1300,
+                     1350,
+                     1400,
+                     1450,
+                     1500,
+                     1550,
+                     1600,
+                     1650,
+                     1700,
+                     1750,
+                     1800,
+                     1850,
+                     1900,
+                     1950,
+                     2000,  
+                     2050,
+                     2100,
+                     2150,
+                     2200,
+                     2250,
+                     2300,
+                     2350,
+                     2400,
+                     2450,
+                     2500,
+                     2550,
+                     2600,
+                     2650,
+                     2700,
+                     2750,
+                     2800,
+                     2850,
+                     2900,
+                     2950,
+                     3000,
+                     3050,
+                     3100,
+                     3150,
+                     3200
+                };
     Double_t xbins_dbl[n_bins + 1];
     for(size_t j = (n_bins + 1); j --;) {
         xbins_dbl[j] = xbins[j];
@@ -181,14 +237,14 @@ void plot_bdt_recoilPt_0(
 
             // Read tree from input file
             TFile* file = new TFile(flatDir1 + "/pn_eval.root");
-            TTree* tree = (TTree*)file->Get("rsegmipx_Veto");
+            TTree* tree = (TTree*)file->Get(bdtName1+"_Veto");
             assert(tree);
 
             // Set up histogram to be filled with disc values
             TH1D* dvhist = new TH1D(seln + "_bkg", "", 5000, 0.0, 1.0);
 
             // Read off disc values from tree into histogram
-            tree->Draw("discValue_rsegmipx>>" + seln + "_bkg", sel[withSelect]);
+            tree->Draw("discValue_"+bdtName1+">>" + seln + "_bkg", sel[withSelect]);
 
             // Store background histogram
             bkghist = dvhist;
@@ -196,8 +252,7 @@ void plot_bdt_recoilPt_0(
             // Get cut value for selected background efficiency
             float cutval = getCutValueForEfficiency(bkghist, bkgEff)[0];
             cout << "Cut value for BDT version (" + bdtName1 + "): cutval = " << cutval;
-            sel[seln] = sel[withSelect] + " && discValue_rsegmipx > " + cutval;
-            // sel[seln] = sel[withSelect] + " && discValue_fernand > " + cutval; //" + bdtName1 + " > " + cutval;
+            sel[seln] = sel[withSelect] + " && discValue_"+bdtName1+" > " + cutval;
         }
 
         else if(seln == bdtName2) {
@@ -205,14 +260,14 @@ void plot_bdt_recoilPt_0(
 
             // Read tree from input file
             TFile* file = new TFile(flatDir2 + "/pn_eval.root");
-            TTree* tree = (TTree*)file->Get("segmipx_Veto");
+            TTree* tree = (TTree*)file->Get(bdtName2+"_Veto");
             assert(tree);
 
             // Set up histogram to be filled with disc values
             TH1D* dvhist = new TH1D(seln + "_bkg", "", 5000, 0.0, 1.0);
 
             // Read off disc values from tree into histogram
-            tree->Draw("discValue_segmipx>>" + seln + "_bkg", sel[withSelect]);
+            tree->Draw("discValue_"+bdtName2+">>" + seln + "_bkg", sel[withSelect]);
 
             // Store background histogram
             bkghist = dvhist;
@@ -254,32 +309,31 @@ void plot_bdt_recoilPt_0(
             if(seln == bdtName1) {
                 cout << "Getting data for BDT version (" + bdtName1 + ")..." << endl;
                 file = new TFile(flatDir1 + "/" + proc + "_eval.root");
-                //file = new TFile(flatDir1 + "/" + proc + "_" + bdtName1 + "_eval_0.root");
-                tree = (TTree*)file->Get("rsegmipx_Veto");
+                tree = (TTree*)file->Get(bdtName1+"_Veto");
             }
 
             else {
                 cout << "Getting data for BDT version (" + bdtName2 + ")..." << endl;
                 file = new TFile(flatDir2 + "/" + proc + "_eval.root");
-                tree = (TTree*)file->Get("segmipx_Veto");
+                tree = (TTree*)file->Get(bdtName2+"_Veto");
             }
 
             assert(tree);
 
             // Set up histogram with the correct binning
-            TH1D* hist = new TH1D("h_recoilPt_" + proc + "_" + seln, "", 100, 0, 100);
+            TH1D* hist = new TH1D("h_recoilPt_" + proc + "_" + seln, "", 480, 0, 3200);
     	    hist->SetBins(n_bins, xbins_dbl);
 		
             hist->SetLineColor(colors[seln]);
 
             // Draw the plot using the given data
-            tree->Draw("recoilPT >> h_recoilPt_" + proc + "_" + seln, sel[seln], "hist");
+            tree->Draw("Ap_dz >> h_recoilPt_" + proc + "_" + seln, sel[seln], "hist");
 
             // Add overflow contents to the last bin
             addOverFlow(hist);
 
             // Set up axis labels and colors
-            hist->GetXaxis()->SetTitle("p_{T}(recoil e^{-}) (MeV)");
+            hist->GetXaxis()->SetTitle("z_{A' decay}) (mm)");
             hist->GetXaxis()->SetTitleSize(0.04);
             hist->GetYaxis()->SetTitle("Entries");
             hist->GetYaxis()->SetTitleSize(0.05);
@@ -334,6 +388,6 @@ void plot_bdt_recoilPt_0(
         LDMX_lumi(c, 0);
 
         // Save the plot
-        c->SaveAs(outDir + "/" + withSelect + "_" + bdtName1 + "_" + bdtName2 + "_" + proc + "_recoilPt.pdf");
+        c->SaveAs(outDir + "/" + withSelect + "_" + bdtName1 + "_" + bdtName2 + "_" + proc + "_Apdz.pdf");
     }
 }
