@@ -6,6 +6,7 @@ triggerStuff/*/
 confs/local_*
 confs/nocommit
 *_bdt/
+*_bdts/
 mods/__pycache__/
 mods/ecal/__pycache__/
 *.pcm

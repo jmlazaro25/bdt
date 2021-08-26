@@ -176,7 +176,7 @@ backv1all_funcs = {
                         'priority': 30,
                         'brs': ()
                         },
-                    hcal.collect: {
+                    hcal.collect_back: {
                         'priority': 31,
                         'brs': (
                             ('HcalRecHits_'+pp, 'HcalHit'),
@@ -245,6 +245,24 @@ trees_info_backv1 = {
                     **trees_info_backv1seg
                     }
 
+
+# Side HCal
+##################################################
+sidev1_funcs = {
+                    hcal.side_totals: {
+                        'priority': 31,
+                        'brs': (
+                            ('HcalRecHits_'+pp, 'HcalHit'),
+                            )
+                        }
+                    }
+
+trees_info_sidev1 = {}
+for s in range(hcal.TOP, hcal.nsections):
+
+    trees_info_sidev1[f'side{s}_energy'] = {'rtype': float, 'default': 0.}
+    trees_info_sidev1[f'side{s}_PE']     = {'rtype': int,   'default': 0 }
+
 # Gabrielle
 ##################################################
 trees_info_gabrielle = trees_info_base_ecal.copy()
@@ -261,7 +279,7 @@ gabrielle_funcs = {
 
 for r in range(1, emain.contRegions + 1):
 
-    trees_info_gabrielle[f'electronContainmentEnergy_x{r}'] = {'rtype': float, 'default': 0 }
+    trees_info_gabrielle[f'electronContainmentEnergy_x{r}'] = {'rtype': float, 'default': 0.}
     trees_info_gabrielle[f'photonContainmentEnergy_x{r}']   = {'rtype': float, 'default': 0.}
     trees_info_gabrielle[f'outsideContainmentEnergy_x{r}']  = {'rtype': float, 'default': 0.}
     trees_info_gabrielle[f'outsideContainmentNHits_x{r}']   = {'rtype': int,   'default': 0 }
@@ -536,6 +554,8 @@ feats_backv1all = trees_info_backv1all
 feats_backv1seg = trees_info_backv1seg
 
 feats_backv1 = trees_info_backv1
+
+feats_sidev1 = trees_info_sidev1
 
 # Ecal
 feats_base_ecal = trees_info_base_ecal

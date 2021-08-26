@@ -32,6 +32,12 @@ hcal_dz = hcal_back_dz + hcal_side_dz
 
 # DetDescr
 # HcalSection BACK = 0, TOP = 1, BOTTOM = 2, LEFT = 4, RIGHT = 3
+BACK = 0
+TOP = 1
+BOTTOM = 2
+RIGHT = 3
+LEFT = 4
+nsections = 5
 SECTION_MASK = 0x7 # space for up to 7 sections
 SECTION_SHIFT = 18
 LAYER_MASK = 0xFF  # space for up to 255 layers
@@ -105,12 +111,12 @@ def prep_hcal_lfs(f_dict, args, h_store, lq):
 
     h_store['back_hits'] = np.zeros(5)
 
-def collect(f_dict, args, h_store, hcalRecHit):
+def collect_back(f_dict, args, h_store, hcalRecHit):
 
     """ Collect hcal hit info in desired array format """
 
     # Hit and energy-weighted hit (info) arrays
-    if not section(hcalRecHit) == 0: return
+    if not section(hcalRecHit) == BACK: return
     if not hcalRecHit.getEnergy() > 0: return
     if hcalRecHit.getTime() >= maxTime: return
     if hcalRecHit.getZPos() > maxDepth: return
@@ -239,3 +245,17 @@ def backv1seg(f_dict, args, h_store, lq):
 ##################################################
 # Side functions
 ##################################################
+
+def side_totals(f_dict, args, h_store, hcalRecHit):
+
+    """ Prelim total side vars """
+
+    if section( hcalRecHit ) != BACK: return
+    if not hcalRecHit.getEnergy() > 0: return
+    if hcalRecHit.getTime() >= maxTime: return
+    if hcalRecHit.getZPos() > maxDepth: return
+
+    for sec in range(TOP, nsections):
+        if section(hcalRecHit) == sec:
+            f_dict[f'side{sec}_energy'] += hcalRecHit.getEnergy()
+            f_dict[f'side{sec}_PE'] += hcalRecHit.getPE()
