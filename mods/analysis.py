@@ -23,7 +23,7 @@ def trigger(f_dict, args, x_store, lq):
 
     """ Record if event cut by standard trigger """
 
-    f_dict['trigPass'] = next( iter( args.values ) ).passed()
+    f_dict['trigPass'] = next( iter( args.values() ) ).passed()
 
 '''
 def recoil_tracks(f_dict, args, e_store, lq):
@@ -49,7 +49,10 @@ def recoilPT(f_dict, args, e_store, lq):
 
     """ Save recoilPMag from ecal_init to tree """
 
-    f_dict['recoilPT'] = e_store['recoilPMag']
+    targetSPHits = next( iter( args.values() ) )
+    e_targetHit = physics.electronTargetSPHit(targetSPHits)
+    if e_targetHit is not None:
+        f_dict['recoilPT'] = physics.mag( e_targetHit.getMomentum() )
 
 def decay_verts(f_dict, args, x_store, lq):
 

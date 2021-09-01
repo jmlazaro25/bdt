@@ -91,7 +91,9 @@ analysis_funcs = {
                         },
                     analysis.recoilPT: {
                         'priority': 20.1,
-                        'brs': ()
+                        'brs': (
+                            ('TargetScoringPlaneHits_'+pp, 'SimTrackerHit'),
+                            )
                         },
                     analysis.decay_verts: {
                         'priority':  1,
@@ -208,7 +210,7 @@ backv1seg_funcs = {
                             'priority': 30,
                             'brs': ()
                             },
-                        hcal.collect: {
+                        hcal.collect_back: {
                             'priority': 31,
                             'brs': (
                                 ('HcalRecHits_'+pp, 'HcalHit'),
