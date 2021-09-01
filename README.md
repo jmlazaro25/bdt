@@ -1,6 +1,6 @@
 # Python Implimentation of BDT
 
-## Purpose: Test potential of ML using multiple subdetectors, especially in the case of visible signal decays
+## Purpose: Test potential of ML using multiple subdetectors, especially in the case of visible signal.
 ## Requirments: Working install of `ldmx-sw-v2.3.0` or greater.
 * The rsegcont feature set requires the `awkward ` python package which is not the standard ldmx container
   * You can pull `jmlazaro/pro:vissig` from docker hub (and `sympy` for A'->e+e- production), or make your own.
