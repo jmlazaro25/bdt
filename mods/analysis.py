@@ -47,7 +47,7 @@ def recoil_tracks(f_dict, args, e_store, lq):
 
 def recoilPT(f_dict, args, e_store, lq):
 
-    """ Save recoilPMag from ecal_init to tree """
+    """ Get electron recoil pt at target """
 
     targetSPHits = next( iter( args.values() ) )
     e_targetHit = physics.electronTargetSPHit(targetSPHits)
