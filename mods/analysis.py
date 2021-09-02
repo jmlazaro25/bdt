@@ -25,6 +25,30 @@ def trigger(f_dict, args, x_store, lq):
 
     f_dict['trigPass'] = next( iter( args.values() ) ).passed()
 
+def recoilPT(f_dict, args, e_store, lq):
+
+    """ Get electron recoil pt at target """
+
+    targetSPHits = next( iter( args.values() ) )
+    e_targetHit = physics.electronTargetSPHit(targetSPHits)
+    if e_targetHit is not None:
+        f_dict['recoilPT'] = physics.mag( e_targetHit.getMomentum()[:2] )
+
+def decay_verts(f_dict, args, x_store, lq):
+
+    """
+    A' decay verticies (only applicable to vissig samples)
+    +/- ~1 mm as really using electron creation verticies
+    """
+
+    Abi = 1
+    for simParticle in next( iter( args.values() ) ):
+        Abi += 1
+        if Abi != 4: continue
+        #f_dict['Ap_dt'] = simParticle[1].getTime Is overloading not sig anw
+        f_dict['Ap_dx'], f_dict['Ap_dy'], f_dict['Ap_dz'] \
+                = simParticle[1].getVertex()
+
 '''
 def recoil_tracks(f_dict, args, e_store, lq):
 
@@ -44,27 +68,3 @@ def recoil_tracks(f_dict, args, e_store, lq):
     f_dict['n_recoil_tracks'] = n_recoil_tracks
     f_dict['max_track_pmag'] = max_pmag
 '''
-
-def recoilPT(f_dict, args, e_store, lq):
-
-    """ Get electron recoil pt at target """
-
-    targetSPHits = next( iter( args.values() ) )
-    e_targetHit = physics.electronTargetSPHit(targetSPHits)
-    if e_targetHit is not None:
-        f_dict['recoilPT'] = physics.mag( e_targetHit.getMomentum() )
-
-def decay_verts(f_dict, args, x_store, lq):
-
-    """
-    A' decay verticies (only applicable to vissig samples)
-    +/- ~1 mm as really using electron creation verticies
-    """
-
-    Abi = 1
-    for simParticle in next( iter( args.values() ) ):
-        Abi += 1
-        if Abi != 4: continue
-        #f_dict['Ap_dt'] = simParticle[1].getTime Is overloading not sig anw
-        f_dict['Ap_dx'], f_dict['Ap_dy'], f_dict['Ap_dz'] \
-                = simParticle[1].getVertex()
