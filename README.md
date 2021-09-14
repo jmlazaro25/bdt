@@ -2,18 +2,18 @@
 
 ## Purpose: Test potential of ML using multiple subdetectors, especially in the case of visible signal.
 ## Requirments: Working install of `ldmx-sw-v2.3.0` or greater.
-* The rsegcont feature set requires the `awkward ` python package which is not the standard ldmx container
-  * You can pull `jmlazaro/pro:vissig` from docker hub (and `sympy` for A'->e+e- production), or make your own.
+* Commented version of rsegcont feature set requires the `awkward ` python package which is not the standard ldmx container
+  * You can pull `jmlazaro/pro:vissig` from docker hub (also has `sympy` for A'->e+e- production), or make your own.
 * If using v2.X.X, change `libFramework.so` to `libEvent.so` in `mainframe.py`.
 * `confs/gabreille_back_v1.ini` is used here as an example config. See its comments for further explanation.
 
 In the directory containing `ldmx-sw`, `$LDMX_BASE`, enter `source ldmx-sw/scripts/ldmx-env.sh`.
-* You may clone `ldmx-sw` with a different name (e.g. `ldmx-sw-v3.0.0`), just chnage it in the above command and in `ROOT.gSystem.Load()` in `mainframe.py`
+* You may clone `ldmx-sw` with a different name (e.g. `ldmx-sw-v3.0.0`), just change it in the above command and in `ROOT.gSystem.Load()` in `mainframe.py`
 
 ### Interactive
 To make flat trees from ldmx event files:
 ```
-ldmx python3 mainframe.py trees confs/test.ini
+ldmx python3 mainframe.py trees confs/<test.ini>
 ```
 * `-m` can be used to give maximum number of events to run over 
 * `-p` can be used to selected a subset of processeses listed in the config file
@@ -22,12 +22,12 @@ ldmx python3 mainframe.py trees confs/test.ini
 To train BDT:
 `ldmx hadd` flat trees into the paths given in the config file
 ```
-ldmx python3 mainfraim.py train confs/test.ini
+ldmx python3 mainfraim.py train confs/<test.ini>
 ```
 
 To evaluate trained BDT on test samples:
 ```
-ldmx python3 mainframe.py eval confs/test.ini
+ldmx python3 mainframe.py eval confs/<test.ini>
 ```
 
 ### Batch
